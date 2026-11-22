@@ -1,0 +1,36 @@
+# syntax=docker/dockerfile:1
+# Pitcrew resolver sidecar: the Go resolver (resolver/) layered onto a runtime's own image.
+# One image per runtime version; the resolver serves whichever ecosystems' tools it finds
+# (bundler in a Ruby image). Examples:
+#   docker build -f Dockerfile.resolver --build-arg BASE=ruby:3.4-slim -t pitcrew-resolver:ruby-3.4 .
+#   docker build -f Dockerfile.resolver --build-arg BASE=ruby:3.3-slim -t pitcrew-resolver:ruby-3.3 .
+# Very old bases (ruby:2.x) may need their apt sources pointed at archive.debian.org, and
+# ship an old Bundler.
+ARG BASE=ruby:3.4-slim
+
+FROM golang:1.23 AS build
+WORKDIR /src
+COPY resolver/ ./
+# Tests run in the build: a failing test fails the image.
+RUN go vet ./... && go test ./... && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /resolver .
+
+FROM ${BASE}
+
+# git: Gemfiles may use git:/github: sources
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y git && \
+    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+
+# Same uid as the app image's `rails` user, so both can write the shared /work checkouts.
+RUN groupadd --system --gid 1000 resolver && \
+    useradd resolver --uid 1000 --gid 1000 --create-home --shell /bin/bash
+USER 1000:1000
+# BUNDLE_APP_CONFIG keeps Bundler's per-app config out of the shared checkout.
+ENV HOME=/home/resolver \
+    GEM_HOME=/home/resolver/.gem \
+    BUNDLE_USER_HOME=/home/resolver/.bundle \
+    BUNDLE_APP_CONFIG=/home/resolver/.bundle/app
+
+COPY --from=build /resolver /usr/local/bin/resolver
+EXPOSE 9292
+CMD ["resolver"]

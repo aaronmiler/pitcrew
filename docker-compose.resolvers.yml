@@ -1,0 +1,37 @@
+# Resolver sidecars for local development. In production, use the published images
+# (ghcr.io/aaronmiler/pitcrew-resolver:ruby-3.4, ...); see the README's Deployment section.
+#   docker compose -f docker-compose.resolvers.yml up -d --build
+# Then in .env:
+#   RESOLVER_RUBY_3_3=http://127.0.0.1:9333
+#   RESOLVER_RUBY_3_4=http://127.0.0.1:9334
+name: pitcrew-resolvers
+
+x-resolver: &resolver
+  volumes:
+    - ./tmp/work:/work
+  labels:
+    pitcrew.role: resolver
+  restart: unless-stopped
+
+services:
+  pitcrew-ruby33:
+    <<: *resolver
+    container_name: pitcrew-ruby33
+    build:
+      context: .
+      dockerfile: Dockerfile.resolver
+      args:
+        BASE: ruby:3.3-slim
+    ports:
+      - "127.0.0.1:9333:9292" # localhost only
+
+  pitcrew-ruby34:
+    <<: *resolver
+    container_name: pitcrew-ruby34
+    build:
+      context: .
+      dockerfile: Dockerfile.resolver
+      args:
+        BASE: ruby:3.4-slim
+    ports:
+      - "127.0.0.1:9334:9292"

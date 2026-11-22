@@ -1,0 +1,9 @@
+---
+gem: nokogiri
+ghsa: xxxx-yyyy-zzzz
+url: https://github.com/advisories/GHSA-xxxx-yyyy-zzzz
+title: Fixture advisory for a gem the fixture lockfiles don't use
+date: 2025-01-01
+description: Fixture advisory for Pitcrew specs.
+patched_versions:
+  - ">= 1.18.0"
