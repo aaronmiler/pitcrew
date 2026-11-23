@@ -10,6 +10,10 @@ module AdvisoryDb
     Pathname(ENV.fetch("ADVISORY_DB_PATH", Rails.root.join("storage/ruby-advisory-db").to_s))
   end
 
+  def self.cloned?(path: self.path)
+    path.join(".git").directory?
+  end
+
   def self.database(path: self.path)
     Bundler::Audit::Database.new(path.to_s)
   end

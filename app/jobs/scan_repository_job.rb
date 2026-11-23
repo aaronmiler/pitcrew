@@ -8,6 +8,10 @@ class ScanRepositoryJob < ApplicationJob
     repository = Repository.enabled.find_by(id: repository_id)
     return unless repository
 
+    # Before the first sync (a fresh deploy) there's nothing to scan against. Skip: the
+    # sync's first clone rescans every enabled repo.
+    return unless AdvisoryDb.cloned?
+
     result = begin
       RepositoryScan.call(repository:, force:)
     rescue StandardError => e
