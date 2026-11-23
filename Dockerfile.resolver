@@ -23,7 +23,8 @@ RUN apt-get update -qq && \
 
 # Same uid as the app image's `rails` user, so both can write the shared /work checkouts.
 RUN groupadd --system --gid 1000 resolver && \
-    useradd resolver --uid 1000 --gid 1000 --create-home --shell /bin/bash
+    useradd resolver --uid 1000 --gid 1000 --create-home --shell /bin/bash && \
+    mkdir /work && chown resolver:resolver /work # the `work` volume takes this ownership
 USER 1000:1000
 # BUNDLE_APP_CONFIG keeps Bundler's per-app config out of the shared checkout.
 ENV HOME=/home/resolver \
