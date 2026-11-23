@@ -4,7 +4,7 @@ module AdvisoryDb
   # importer reads it for when each advisory first landed.
   class Sync < ApplicationService
     def call(path: AdvisoryDb.path, url: AdvisoryDb::REPO_URL)
-      if path.join(".git").directory?
+      if AdvisoryDb.cloned?(path:)
         before = head(path)
         Command.run!("git", "pull", "--ff-only", "--quiet", chdir: path)
       else

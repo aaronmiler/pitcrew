@@ -3,6 +3,8 @@ require "rails_helper"
 RSpec.describe ScanRepositoryJob, type: :job do
   include ActiveJob::TestHelper
 
+  before { allow(AdvisoryDb).to receive(:cloned?).and_return(true) }
+
   it "scans an enabled repo" do
     repository = create(:repository, enabled: true)
     allow(RepositoryScan).to receive(:call).and_return(detected: 0, resolved: 0, open: 0)
@@ -17,6 +19,15 @@ RSpec.describe ScanRepositoryJob, type: :job do
 
     described_class.perform_now(create(:repository, enabled: false).id)
     described_class.perform_now(0)
+
+    expect(RepositoryScan).not_to have_received(:call)
+  end
+
+  it "skips when the advisory db hasn't been cloned yet" do
+    allow(AdvisoryDb).to receive(:cloned?).and_return(false)
+    allow(RepositoryScan).to receive(:call)
+
+    described_class.perform_now(create(:repository, enabled: true).id)
 
     expect(RepositoryScan).not_to have_received(:call)
   end
