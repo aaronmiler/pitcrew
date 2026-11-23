@@ -80,6 +80,7 @@ export interface Repository {
   ecosystems: string[] | null
   supportedEcosystems: string[]
   resolverConfigured: boolean | null
+  rubyMinor: string | null
   url: string
 }
 
@@ -89,6 +90,7 @@ export interface RepositoryListItem extends Repository {
 }
 
 export interface RepositoryDetail extends Repository {
+  resolverMinors: string[]
   resolvedCount: number
   findings: Finding[]
   pullRequests: PullRequest[]

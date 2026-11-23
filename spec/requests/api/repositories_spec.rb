@@ -82,10 +82,25 @@ RSpec.describe "Api::Repositories", type: :request do
       expect(ScanRepositoryJob).not_to have_been_enqueued
     end
 
-    it "only lets enabled change" do
+    it "only lets enabled and ruby_minor change" do
       patch "/api/repositories/#{repository.id}", params: { enabled: true, full_name: "evil/repo" }, as: :json
 
       expect(repository.reload.full_name).to eq("aaronmiler/esther")
+    end
+
+    it "sets the Ruby to resolve with, and clears it with a blank" do
+      patch "/api/repositories/#{repository.id}", params: { ruby_minor: "3.3" }, as: :json
+      expect(repository.reload.ruby_minor).to eq("3.3")
+
+      patch "/api/repositories/#{repository.id}", params: { ruby_minor: "" }, as: :json
+      expect(repository.reload.ruby_minor).to be_nil
+    end
+
+    it "rejects a Ruby that isn't a minor" do
+      patch "/api/repositories/#{repository.id}", params: { ruby_minor: "3.3.6" }, as: :json
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(repository.reload.ruby_minor).to be_nil
     end
   end
 

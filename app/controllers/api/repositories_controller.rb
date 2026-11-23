@@ -14,10 +14,13 @@ module Api
       render json: RepositoryBlueprint.render(Repository.find(params[:id]), view: :detail)
     end
 
-    # Only `enabled` is editable. Enabling a repo scans it right away.
+    # Only `enabled` and `ruby_minor` are editable. Enabling a repo scans it right away.
     def update
       repository = Repository.find(params[:id])
-      repository.update!(params.expect(repository: [:enabled]))
+      attributes = params.expect(repository: %i[enabled ruby_minor])
+      attributes[:ruby_minor] = attributes[:ruby_minor].presence if attributes.key?(:ruby_minor)
+      return render json: { errors: repository.errors.full_messages }, status: :unprocessable_content unless repository.update(attributes)
+
       ScanRepositoryJob.perform_later(repository.id, force: true) if repository.enabled? && repository.saved_change_to_enabled?
       render json: RepositoryBlueprint.render(repository)
     end

@@ -137,6 +137,8 @@ For both you and the team: a page plus a copyable summary.
   - [ ] Push; first images published
   - [ ] tars compose entry (`pitcrew`, `pitcrew-jobs`, resolvers on an internal network, shared `/work` volume, shared infra Postgres via `DATABASE_URL`), `.env` (by hand), App callback URL, proxy route
   - [ ] `tars deploy pitcrew`; verify boot, first advisory sync, resolvers reachable; stop local `bin/dev` cron
+  - [x] Per-repo `ruby_minor` (repo page select) for repos with no `.ruby-version`, e.g. gems; fallback only, a declared `.ruby-version` wins
+  - [x] Scans skip until the first advisory sync has cloned the DB (that sync rescans everything); `/work` created owned by uid 1000 in both images
 
 ### JS phases (after Ruby is live)
 

@@ -20,8 +20,9 @@ rules there, not here.
   against a target repo.
 - Resolution runs in the resolver sidecar for the Ruby minor the checkout declares
   (`.ruby-version` on the branch being fixed), never in the app process: a Gemfile is
-  executable code. A missing resolver is a `needs_attention` finding, not a fallback to
-  another Ruby.
+  executable code. A repo that declares none (e.g. a gem) uses the minor set on it in the
+  UI (`Repository#ruby_minor`); a declared `.ruby-version` always wins. A missing resolver
+  is a `needs_attention` finding, not a fallback to another Ruby.
 - At most one open Pitcrew PR per repo, each on its own branch
   (`pitcrew/security-YYYYMMDD-HHMM`). A new PR builds on the default branch's
   head; an update builds on the PR branch's head, so people's commits on it carry forward

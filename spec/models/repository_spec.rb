@@ -9,6 +9,8 @@ RSpec.describe Repository, type: :model do
   it { is_expected.to validate_presence_of(:full_name) }
   it { is_expected.to validate_uniqueness_of(:full_name) }
   it { is_expected.to validate_uniqueness_of(:github_id) }
+  it { is_expected.to allow_values(nil, "3.4", "4.0").for(:ruby_minor) }
+  it { is_expected.not_to allow_values("3.4.9", "ruby-3.4", "", "3").for(:ruby_minor) }
 
   describe "#runtime_minor" do
     it "reduces a full version to its minor line" do
@@ -21,6 +23,14 @@ RSpec.describe Repository, type: :model do
 
     it "is nil without a version for that runtime" do
       expect(build(:repository, runtimes: {}).runtime_minor(:ruby)).to be_nil
+    end
+
+    it "falls back to the repo's ruby_minor when it declares no Ruby" do
+      expect(build(:repository, runtimes: {}, ruby_minor: "3.3").runtime_minor(:ruby)).to eq("3.3")
+    end
+
+    it "prefers a declared Ruby over ruby_minor" do
+      expect(build(:repository, runtimes: { "ruby" => "3.4.9" }, ruby_minor: "3.3").runtime_minor(:ruby)).to eq("3.4")
     end
   end
 

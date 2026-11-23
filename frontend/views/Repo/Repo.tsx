@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { Link, useParams } from "react-router"
 
@@ -32,9 +32,15 @@ const Repo = () => {
     queryFn: () => apiRepositories.show<RepositoryDetail>({ params: { id: id! } }),
   })
 
+  const queryClient = useQueryClient()
+
   const scan = useMutation({
     mutationFn: () => apiRepositories.scan({ params: { id: id! } }),
     onSuccess: () => setNotice("Scan queued. Refresh in a moment to see results."),
+  })
+  const setRubyMinor = useMutation({
+    mutationFn: (rubyMinor: string) => apiRepositories.update({ params: { id: id! }, data: { rubyMinor } }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["repositories"] }),
   })
 
   if (isPending) return <p className="text-sm text-gray-500">Loading…</p>
@@ -58,6 +64,22 @@ const Repo = () => {
             {repo.enabled ? "Enabled" : "Disabled"} · Ruby {repo.runtimes.ruby ?? "unknown"} · {repo.defaultBranch} ·
             scanned {timeAgo(repo.lastScannedAt)}
           </p>
+          <label className="mt-2 flex items-center gap-2 text-sm text-gray-600">
+            Ruby when there&apos;s no .ruby-version
+            <select
+              className="input"
+              value={repo.rubyMinor ?? ""}
+              onChange={(e) => setRubyMinor.mutate(e.target.value)}
+              disabled={setRubyMinor.isPending}
+            >
+              <option value="">None (flag fixes)</option>
+              {[...new Set([...repo.resolverMinors, ...(repo.rubyMinor ? [repo.rubyMinor] : [])])].map((minor) => (
+                <option key={minor} value={minor}>
+                  Ruby {minor}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
         <div className="ml-auto flex gap-2">
           <button type="button" className="btn" onClick={() => refetch()} disabled={isFetching}>
@@ -80,7 +102,9 @@ const Repo = () => {
         </div>
       )}
       {notice && <p className="text-sm text-gray-600">{notice}</p>}
-      {scan.error && <p className="text-sm text-red-700">{errorMessage(scan.error)}</p>}
+      {(scan.error ?? setRubyMinor.error) && (
+        <p className="text-sm text-red-700">{errorMessage(scan.error ?? setRubyMinor.error)}</p>
+      )}
 
       <div className="space-y-2">
         <h2 className="font-semibold">
