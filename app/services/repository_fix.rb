@@ -82,12 +82,12 @@ class RepositoryFix < ApplicationService
 
   # The Ruby the checkout itself declares picks the resolver: an open PR's branch can be on
   # a newer Ruby than the default branch (the upgrade lives there until it merges). Falls
-  # back to the default branch's, from the last scan. Not written back: runtimes describe
-  # the default branch.
+  # back to the default branch's, from the last scan, then the repo's ruby_minor (set in the
+  # UI for repos that declare none). Not written back: runtimes describe the default branch.
   def checkout_ruby_minor(dir)
     file = dir.join(".ruby-version")
     version = Repository.ruby_version_from(file.read(100)) if file.file? && !file.symlink?
-    Repository.minor_of(:ruby, version || @repository.runtimes["ruby"])
+    version ? Repository.minor_of(:ruby, version) : @repository.runtime_minor(:ruby)
   end
 
   def fix(dir, base, ruby_minor)

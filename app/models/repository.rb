@@ -7,6 +7,7 @@ class Repository < ApplicationRecord
   validates :github_id, presence: true, uniqueness: true
   validates :full_name, presence: true, uniqueness: true
   validates :default_branch, :installation_id, presence: true
+  validates :ruby_minor, format: { with: /\A\d+\.\d+\z/ }, allow_nil: true
 
   scope :enabled, -> { where(enabled: true) }
 
@@ -55,8 +56,9 @@ class Repository < ApplicationRecord
   end
 
   # A runtime's minor line, which picks its resolver sidecar: runtimes["ruby"] "3.4.9" -> "3.4".
+  # Ruby falls back to the repo's ruby_minor when the default branch declares none.
   def runtime_minor(runtime)
-    self.class.minor_of(runtime, runtimes[runtime.to_s])
+    self.class.minor_of(runtime, runtimes[runtime.to_s]) || (ruby_minor if runtime.to_s == "ruby")
   end
 
   def self.minor_of(runtime, version)

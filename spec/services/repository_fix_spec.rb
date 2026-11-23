@@ -145,6 +145,14 @@ RSpec.describe RepositoryFix do
       expect(Resolver::Client).not_to have_received(:call)
     end
 
+    it "resolves with the repo's ruby_minor when it declares no Ruby" do
+      repository.update!(runtimes: {}, ruby_minor: "3.4")
+
+      fix
+
+      expect(resolver_calls.map { it[:ruby_minor] }.uniq).to eq(["3.4"])
+    end
+
     it "refuses to publish if resolving touched anything but Gemfile.lock" do
       allow(Resolver::Client).to receive(:call) do |dir:, **|
         File.write(File.join(@work, dir, "Gemfile"), "tampered")

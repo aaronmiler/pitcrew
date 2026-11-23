@@ -10,54 +10,54 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_22_210000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_23_020000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
   create_table "advisories", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.string "criticality"
-    t.string "cve"
     t.string "ecosystem", default: "rubygems", null: false
-    t.datetime "first_seen_at", null: false
-    t.string "ghsa"
-    t.datetime "ghsa_published_at"
-    t.datetime "ghsa_reviewed_at"
     t.string "package_name", null: false
+    t.string "source_id", null: false
+    t.string "cve"
+    t.string "ghsa"
+    t.string "title"
+    t.string "url"
+    t.string "criticality"
     t.string "patched_versions", default: [], null: false, array: true
+    t.string "unaffected_versions", default: [], null: false, array: true
     t.date "published_on"
     t.datetime "source_committed_at"
-    t.string "source_id", null: false
-    t.string "title"
-    t.string "unaffected_versions", default: [], null: false, array: true
+    t.datetime "ghsa_published_at"
+    t.datetime "ghsa_reviewed_at"
+    t.datetime "first_seen_at", null: false
+    t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "url"
     t.index ["ecosystem", "package_name", "cve"], name: "index_advisories_on_ecosystem_and_package_name_and_cve", unique: true, where: "(cve IS NOT NULL)"
     t.index ["ecosystem", "package_name", "ghsa"], name: "index_advisories_on_ecosystem_and_package_name_and_ghsa", unique: true, where: "(ghsa IS NOT NULL)"
     t.index ["ecosystem", "package_name", "source_id"], name: "index_advisories_on_ecosystem_and_package_name_and_source_id", unique: true
   end
 
   create_table "finding_events", force: :cascade do |t|
-    t.datetime "created_at", null: false
     t.bigint "finding_id", null: false
     t.string "kind", null: false
-    t.jsonb "metadata", default: {}, null: false
     t.datetime "occurred_at", null: false
+    t.jsonb "metadata", default: {}, null: false
+    t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["finding_id", "occurred_at"], name: "index_finding_events_on_finding_id_and_occurred_at"
     t.index ["kind", "occurred_at"], name: "index_finding_events_on_kind_and_occurred_at"
   end
 
   create_table "findings", force: :cascade do |t|
+    t.bigint "repository_id", null: false
     t.bigint "advisory_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "detected_at", null: false
     t.bigint "fix_pull_request_id"
     t.string "locked_version", null: false
-    t.text "reason"
-    t.bigint "repository_id", null: false
-    t.datetime "resolved_at"
     t.string "status", default: "open", null: false
+    t.text "reason"
+    t.datetime "detected_at", null: false
+    t.datetime "resolved_at"
+    t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["advisory_id"], name: "index_findings_on_advisory_id"
     t.index ["fix_pull_request_id"], name: "index_findings_on_fix_pull_request_id"
@@ -66,46 +66,46 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_22_210000) do
   end
 
   create_table "fix_pull_requests", force: :cascade do |t|
+    t.bigint "repository_id", null: false
+    t.integer "number", null: false
     t.string "branch", null: false
+    t.string "state", default: "open", null: false
     t.string "ci_status"
+    t.string "head_sha"
+    t.datetime "opened_at", null: false
+    t.datetime "merged_at"
     t.datetime "closed_at"
     t.datetime "created_at", null: false
-    t.string "head_sha"
-    t.datetime "merged_at"
-    t.integer "number", null: false
-    t.datetime "opened_at", null: false
-    t.bigint "repository_id", null: false
-    t.string "state", default: "open", null: false
     t.datetime "updated_at", null: false
     t.index ["repository_id", "number"], name: "index_fix_pull_requests_on_repository_id_and_number", unique: true
     t.index ["repository_id"], name: "index_fix_pull_requests_one_open_per_repository", unique: true, where: "((state)::text = 'open'::text)"
   end
 
   create_table "gem_bumps", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.bigint "fix_pull_request_id", null: false
-    t.string "from_version", null: false
-    t.string "gem_name", null: false
     t.bigint "repository_id", null: false
+    t.bigint "fix_pull_request_id", null: false
+    t.string "gem_name", null: false
+    t.string "from_version", null: false
     t.string "to_version", null: false
+    t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["fix_pull_request_id", "gem_name"], name: "index_gem_bumps_on_fix_pull_request_id_and_gem_name", unique: true
     t.index ["repository_id"], name: "index_gem_bumps_on_repository_id"
   end
 
   create_table "gem_releases", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "version", null: false
     t.datetime "checked_at", null: false
     t.datetime "created_at", null: false
-    t.string "name", null: false
     t.datetime "updated_at", null: false
-    t.string "version", null: false
     t.index ["name"], name: "index_gem_releases_on_name", unique: true
   end
 
   create_table "gem_source_credentials", force: :cascade do |t|
-    t.datetime "created_at", null: false
     t.string "host", null: false
     t.text "secret", null: false
+    t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["host"], name: "index_gem_source_credentials_on_host", unique: true
   end
@@ -211,43 +211,44 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_22_210000) do
   end
 
   create_table "repositories", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.string "default_branch", default: "main", null: false
-    t.string "ecosystems", array: true
-    t.boolean "enabled", default: false, null: false
-    t.string "full_name", null: false
     t.bigint "github_id", null: false
+    t.string "full_name", null: false
+    t.string "default_branch", default: "main", null: false
     t.bigint "installation_id", null: false
+    t.boolean "enabled", default: false, null: false
+    t.string "lockfile_sha"
+    t.datetime "last_scanned_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.text "last_error"
     t.datetime "last_error_at"
     t.string "last_error_source"
-    t.datetime "last_scanned_at"
     t.jsonb "locked_versions", default: {}, null: false
-    t.string "lockfile_sha"
+    t.string "ecosystems", array: true
     t.jsonb "runtimes", default: {}, null: false
-    t.datetime "updated_at", null: false
+    t.string "ruby_minor"
     t.index ["full_name"], name: "index_repositories_on_full_name", unique: true
     t.index ["github_id"], name: "index_repositories_on_github_id", unique: true
   end
 
   create_table "settings", force: :cascade do |t|
+    t.boolean "singleton", default: true, null: false
+    t.string "pr_title_template", default: "chore(security): patch %{advisories} in %{gems}", null: false
     t.string "allowed_orgs", default: [], null: false, array: true
     t.datetime "created_at", null: false
-    t.string "keep_current_gems", default: [], null: false, array: true
-    t.string "pr_title_template", default: "chore(security): patch %{advisories} in %{gems}", null: false
-    t.boolean "singleton", default: true, null: false
-    t.string "tooling_pr_title_template", default: "chore(deps): update %{gems}", null: false
     t.datetime "updated_at", null: false
+    t.string "keep_current_gems", default: [], null: false, array: true
+    t.string "tooling_pr_title_template", default: "chore(deps): update %{gems}", null: false
     t.index ["singleton"], name: "index_settings_on_singleton", unique: true
   end
 
   create_table "users", force: :cascade do |t|
+    t.bigint "github_uid"
+    t.string "github_login", null: false
+    t.string "name"
+    t.string "email"
     t.string "access_via", default: "direct", null: false
     t.datetime "created_at", null: false
-    t.string "email"
-    t.string "github_login", null: false
-    t.bigint "github_uid"
-    t.string "name"
     t.datetime "updated_at", null: false
     t.index "lower((github_login)::text)", name: "index_users_on_lower_github_login", unique: true
     t.index ["github_uid"], name: "index_users_on_github_uid", unique: true, where: "(github_uid IS NOT NULL)"

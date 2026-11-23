@@ -62,26 +62,29 @@ export const EcosystemBadges = ({ repo }: { repo: Pick<Repository, "ecosystems" 
   )
 }
 
-type RubyRepo = Pick<Repository, "runtimes" | "resolverConfigured">
+type RubyRepo = Pick<Repository, "runtimes" | "resolverConfigured" | "rubyMinor">
 
-export const rubyMinor = (repo: Pick<Repository, "runtimes">) =>
+// The minor that picks the repo's resolver: its .ruby-version's, else the one set in the UI.
+export const rubyMinor = (repo: Pick<Repository, "runtimes" | "rubyMinor">) =>
   repo.runtimes.ruby
     ?.replace(/^ruby-/, "")
     .split(".")
     .slice(0, 2)
-    .join(".")
+    .join(".") ?? repo.rubyMinor
 
-// The repo's Ruby; amber when no resolver is configured for its minor (fixes get flagged).
+// The repo's Ruby (or the minor set for it, when it declares none); amber when no resolver
+// is configured for its minor (fixes get flagged).
 export const RubyBadge = ({ repo }: { repo: RubyRepo }) => {
-  if (!repo.runtimes.ruby) return null
+  const label = repo.runtimes.ruby ?? (repo.rubyMinor && `${repo.rubyMinor} (set)`)
+  if (!label) return null
   if (repo.resolverConfigured === false) {
     return (
       <span title={`No Ruby ${rubyMinor(repo)} resolver: fixes will be flagged until you add one.`}>
-        <Badge tone="amber">Ruby {repo.runtimes.ruby}</Badge>
+        <Badge tone="amber">Ruby {label}</Badge>
       </span>
     )
   }
-  return <Badge>Ruby {repo.runtimes.ruby}</Badge>
+  return <Badge>Ruby {label}</Badge>
 }
 
 export default Badge
