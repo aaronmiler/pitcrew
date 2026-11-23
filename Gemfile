@@ -43,6 +43,7 @@ gem "bundler-audit"
 # Sign-in with the GitHub App's OAuth credentials
 gem "omniauth-github"
 gem "omniauth-rails_csrf_protection"
+gem "oauth2", ">= 2.0.22" # CVE-2026-54603; forces hashie < 6 until snaky_hash allows 6
 
 # json 3.0 made JSON.parse options keyword-only; Rails 8.1.3.1's ActiveSupport::JSON.decode
 # still passes a positional hash, which breaks every JSON column read. Drop once Rails catches up.
