@@ -17,8 +17,6 @@ opens one PR per repo. It replaces Dependabot for Ruby.
 5. **Report:** tracks every finding, PR, and status change, and reports exposure windows
    and auto-fix rates.
 
-See `PLAN.md` for the full design.
-
 ## Stack
 
 | | |
