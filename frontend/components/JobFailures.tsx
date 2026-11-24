@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 
 import { timeAgo } from "../lib/format"
+import { LIVE } from "../lib/refresh"
 import { apiJobFailures } from "../lib/routes"
 import type { JobFailure } from "../types"
 import { IncidentNote } from "./ServiceStatus"
@@ -10,6 +11,7 @@ const JobFailures = () => {
   const { data: failures = [] } = useQuery({
     queryKey: ["job_failures"],
     queryFn: () => apiJobFailures.index<JobFailure[]>(),
+    ...LIVE,
   })
 
   if (failures.length === 0) return null

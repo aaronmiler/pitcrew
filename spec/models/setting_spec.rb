@@ -80,6 +80,18 @@ RSpec.describe Setting, type: :model do
     end
   end
 
+  describe "branch_separator" do
+    it "defaults to a dot" do
+      expect(described_class.current.branch_separator).to eq(".")
+    end
+
+    it "accepts only the known separators" do
+      expect(%w[/ . - _].map { build(:setting, branch_separator: it) }).to all(be_valid)
+      expect(build(:setting, branch_separator: "/main")).not_to be_valid
+      expect(build(:setting, branch_separator: "")).not_to be_valid
+    end
+  end
+
   describe "manual fix minutes" do
     it "defaults to 15–30" do
       expect(described_class.current).to have_attributes(manual_fix_minutes_low: 15, manual_fix_minutes_high: 30)

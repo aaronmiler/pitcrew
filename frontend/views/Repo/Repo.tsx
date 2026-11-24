@@ -2,11 +2,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useEffect, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router"
 
-import Badge, { CiBadge, FindingStatusBadge } from "../../components/Badge"
+import Badge, { CiBadge } from "../../components/Badge"
 import { IncidentNote } from "../../components/ServiceStatus"
 import { errorMessage, pluralize, timeAgo } from "../../lib/format"
+import { LIVE, useManualRefresh } from "../../lib/refresh"
 import { apiRepositories } from "../../lib/routes"
-import type { Finding, FindingStatus, RepositoryDetail } from "../../types"
+import type { FindingStatus, RepositoryDetail } from "../../types"
+import FindingRow from "./FindingRow"
 
 const STATUS_ORDER: FindingStatus[] = ["needs_attention", "open", "in_pr"]
 
@@ -28,21 +30,22 @@ const Repo = () => {
     data: repo,
     isPending,
     refetch,
-    isFetching,
   } = useQuery({
     queryKey: ["repositories", id ?? `${owner}/${name}`],
     queryFn: () =>
       id
         ? apiRepositories.show<RepositoryDetail>({ params: { id } })
         : apiRepositories.byName<RepositoryDetail>({ params: { owner: owner!, name: name! } }),
+    ...LIVE,
   })
+  const { refresh, refreshing } = useManualRefresh(refetch)
 
   const queryClient = useQueryClient()
   const navigate = useNavigate()
 
   const scan = useMutation({
     mutationFn: () => apiRepositories.scan({ params: { id: repo!.id } }),
-    onSuccess: () => setNotice("Scan queued. Refresh in a moment to see results."),
+    onSuccess: () => setNotice("Scan queued. Results will appear here shortly."),
   })
   const setRubyMinor = useMutation({
     mutationFn: (rubyMinor: string) => apiRepositories.update({ params: { id: repo!.id }, data: { rubyMinor } }),
@@ -91,8 +94,8 @@ const Repo = () => {
           </label>
         </div>
         <div className="ml-auto flex gap-2">
-          <button type="button" className="btn" onClick={() => refetch()} disabled={isFetching}>
-            {isFetching ? "Refreshing…" : "Refresh"}
+          <button type="button" className="btn" onClick={refresh} disabled={refreshing}>
+            {refreshing ? "Refreshing…" : "Refresh"}
           </button>
           {repo.enabled && (
             <button type="button" className="btn-primary" onClick={() => scan.mutate()} disabled={scan.isPending}>
@@ -188,37 +191,5 @@ const Repo = () => {
     </section>
   )
 }
-
-interface IFindingRow {
-  finding: Finding
-}
-
-const FindingRow = ({ finding }: IFindingRow) => (
-  <tr>
-    <td className="whitespace-nowrap">
-      <code>{finding.advisory.packageName}</code>
-    </td>
-    <td>
-      {finding.advisory.url ? (
-        <a href={finding.advisory.url} target="_blank" rel="noreferrer" className="hover:underline">
-          <code>{finding.advisory.identifier}</code>
-        </a>
-      ) : (
-        <code>{finding.advisory.identifier}</code>
-      )}
-      {finding.advisory.title && <div className="text-muted">{finding.advisory.title}</div>}
-    </td>
-    <td>
-      <code>{finding.lockedVersion}</code>
-    </td>
-    <td className="space-y-1">
-      <div className="space-x-1">
-        <FindingStatusBadge status={finding.status} />
-        {finding.pullRequestNumber && <span className="text-muted">#{finding.pullRequestNumber}</span>}
-      </div>
-      {finding.reason && <div className="text-muted">{finding.reason}</div>}
-    </td>
-  </tr>
-)
 
 export default Repo

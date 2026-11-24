@@ -45,8 +45,14 @@ RSpec.describe Github::CommitLockfile do
     expect(client).not_to have_received(:update_ref)
   end
 
-  it "refuses to write anything but a pitcrew/ branch" do
+  it "refuses to write anything but a pitcrew branch" do
     expect { commit(new_branch: false, branch: "main") }.to raise_error(ArgumentError, /refusing to write main/)
     expect(client).not_to have_received(:create_blob)
+  end
+
+  it "writes a pitcrew branch with a non-slash separator" do
+    commit(new_branch: true, branch: "pitcrew.security-1")
+
+    expect(client).to have_received(:create_ref).with("aaronmiler/app", "heads/pitcrew.security-1", "commit-sha")
   end
 end

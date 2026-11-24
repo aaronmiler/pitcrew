@@ -64,7 +64,7 @@ RSpec.describe RepositoryFix do
       expect(result).to eq(result: "pr_opened", pr: 7, fixed: 2, bumped: 0, blocked: 0)
       pr = repository.fix_pull_requests.sole
       expect(pr).to have_attributes(number: 7, state: "open", head_sha: "commit-sha")
-      expect(pr.branch).to match(%r{\Apitcrew/security-\d{8}-\d{4}\z})
+      expect(pr.branch).to match(/\Apitcrew\.security-\d{8}\z/)
       expect([rack_finding, session_finding].map { it.reload.status }).to eq(%w[in_pr in_pr])
       expect(FindingEvent.where(kind: "pr_opened").count).to eq(2)
     end
@@ -93,7 +93,7 @@ RSpec.describe RepositoryFix do
         .with("aaronmiler/app", "chore(security): patch 2 advisories in rack, rack-session", "tree-sha", ["default-head"])
       expect(client).to have_received(:create_pull_request) do |repo, base, branch, title, body|
         expect([repo, base, title]).to eq(["aaronmiler/app", "main", "chore(security): patch 2 advisories in rack, rack-session"])
-        expect(branch).to start_with("pitcrew/security-")
+        expect(branch).to start_with("pitcrew.security-")
         expect(body).to include("| `rack` | 3.1.0 | 3.1.24 |").and include("| `rack-session` | 2.0.0 | 2.1.2 |")
       end
     end

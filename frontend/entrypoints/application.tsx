@@ -12,7 +12,8 @@ import Repos from "../views/Repos/Repos"
 import Settings from "../views/Settings/Settings"
 import "./application.css"
 
-// No background polling: data refreshes after your own actions or the Refresh buttons.
+// No polling by default. Queries for data that jobs change opt in with LIVE (lib/refresh.ts);
+// settings and forms don't, so a poll never overwrites an edit in progress.
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, retry: 1 } },
 })

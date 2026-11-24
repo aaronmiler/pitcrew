@@ -1,5 +1,5 @@
 module Github
-  # Opens a PR from a pitcrew/* branch into the default branch. Returns its number.
+  # Opens a PR from a Pitcrew branch into the default branch. Returns its number.
   class OpenPullRequest < ApplicationService
     def call(client:, repository:, branch:, title:, body:)
       Github.ensure_pitcrew_branch!(branch)

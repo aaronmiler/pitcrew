@@ -33,7 +33,7 @@ RSpec.describe "Github pull request services" do
   end
 
   describe Github::DeleteBranch do
-    it "refuses to delete anything but a pitcrew/ branch" do
+    it "refuses to delete anything but a pitcrew branch" do
       allow(client).to receive(:delete_branch)
 
       expect { described_class.call(client:, repository:, branch: "main") }.to raise_error(ArgumentError)

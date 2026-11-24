@@ -24,14 +24,15 @@ rules there, not here.
   executable code. A repo that declares none (e.g. a gem) uses the minor set on it in the
   UI (`Repository#ruby_minor`); a declared `.ruby-version` always wins. A missing resolver
   is a `needs_attention` finding, not a fallback to another Ruby.
-- At most one open Pitcrew PR per repo, each on its own branch
-  (`pitcrew/security-YYYYMMDD-HHMM`). A new PR builds on the default branch's
+- At most one open Pitcrew PR per repo, each on its own branch (`pitcrew.security-YYYYMMDD`,
+  `-2` and up for a repo's second PR that day). A new PR builds on the default branch's
   head; an update builds on the PR branch's head, so people's commits on it carry forward
   (never main's tree + our lockfile: that silently reverted them). The default branch is
   merged in server-side only when its lockfile moved; a conflict stops for a person.
   Refs move fast-forward only, never force-pushed. Re-check the PR's state on GitHub
   before deciding to update it or open a new one; the DB copy can be stale.
-- Pitcrew only creates, pushes to, or deletes `pitcrew/*` branches.
+- Pitcrew only creates, pushes to, or deletes its own branches: `pitcrew` plus one of
+  `/ . - _` (`FixPullRequest::BRANCH_PATTERN`; the separator for new ones is a `Setting`).
 - ruby-advisory-db is the detection source of truth; the `advisories` table indexes it.
 - Gem source credentials live encrypted in the DB and reach the resolver per request as
   `BUNDLE_<HOST>` env. Never write them to a clone or a log.
