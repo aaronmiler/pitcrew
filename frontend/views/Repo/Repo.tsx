@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useState } from "react"
-import { Link, useParams } from "react-router"
+import { useEffect, useState } from "react"
+import { Link, useNavigate, useParams } from "react-router"
 
 import Badge, { CiBadge, FindingStatusBadge } from "../../components/Badge"
 import { errorMessage, pluralize, timeAgo } from "../../lib/format"
@@ -18,8 +18,9 @@ const EVENT_LABELS: Record<string, string> = {
   resolved: "Resolved",
 }
 
+// Served at /repos/:owner/:name. An old /repos/:id link loads by id, then swaps to that URL.
 const Repo = () => {
-  const { id } = useParams()
+  const { id, owner, name } = useParams()
   const [notice, setNotice] = useState<string | null>(null)
 
   const {
@@ -28,23 +29,31 @@ const Repo = () => {
     refetch,
     isFetching,
   } = useQuery({
-    queryKey: ["repositories", id],
-    queryFn: () => apiRepositories.show<RepositoryDetail>({ params: { id: id! } }),
+    queryKey: ["repositories", id ?? `${owner}/${name}`],
+    queryFn: () =>
+      id
+        ? apiRepositories.show<RepositoryDetail>({ params: { id } })
+        : apiRepositories.byName<RepositoryDetail>({ params: { owner: owner!, name: name! } }),
   })
 
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
 
   const scan = useMutation({
-    mutationFn: () => apiRepositories.scan({ params: { id: id! } }),
+    mutationFn: () => apiRepositories.scan({ params: { id: repo!.id } }),
     onSuccess: () => setNotice("Scan queued. Refresh in a moment to see results."),
   })
   const setRubyMinor = useMutation({
-    mutationFn: (rubyMinor: string) => apiRepositories.update({ params: { id: id! }, data: { rubyMinor } }),
+    mutationFn: (rubyMinor: string) => apiRepositories.update({ params: { id: repo!.id }, data: { rubyMinor } }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["repositories"] }),
   })
 
-  if (isPending) return <p className="text-sm text-gray-500">Loading…</p>
-  if (!repo) return <p className="text-sm text-gray-500">Repo not found.</p>
+  useEffect(() => {
+    if (id && repo) navigate(`/repos/${repo.fullName}`, { replace: true })
+  }, [id, repo, navigate])
+
+  if (isPending) return <p className="text-sm text-muted">Loading…</p>
+  if (!repo) return <p className="text-sm text-muted">Repo not found.</p>
 
   const findings = [...repo.findings].sort((a, b) => STATUS_ORDER.indexOf(a.status) - STATUS_ORDER.indexOf(b.status))
 
@@ -52,19 +61,18 @@ const Repo = () => {
     <section className="space-y-6">
       <div className="flex flex-wrap items-start gap-3">
         <div>
-          <Link to="/" className="text-sm text-gray-500 hover:underline">
+          <Link to="/" className="text-sm text-muted hover:underline">
             ← Repos
           </Link>
-          <h1 className="text-xl font-semibold">
-            <a href={repo.url} target="_blank" rel="noreferrer" className="hover:underline">
-              {repo.fullName}
-            </a>
-          </h1>
-          <p className="text-sm text-gray-500">
+          <h1 className="heading mt-1">{repo.fullName.split("/").pop()}</h1>
+          <a href={repo.url} target="_blank" rel="noreferrer" className="text-sm text-muted hover:underline">
+            <code>{repo.fullName}</code>
+          </a>
+          <p className="text-sm text-muted">
             {repo.enabled ? "Enabled" : "Disabled"} · Ruby {repo.runtimes.ruby ?? "unknown"} · {repo.defaultBranch} ·
             scanned {timeAgo(repo.lastScannedAt)}
           </p>
-          <label className="mt-2 flex items-center gap-2 text-sm text-gray-600">
+          <label className="mt-2 flex items-center gap-2 text-sm text-muted">
             Ruby when there&apos;s no .ruby-version
             <select
               className="input"
@@ -86,7 +94,7 @@ const Repo = () => {
             {isFetching ? "Refreshing…" : "Refresh"}
           </button>
           {repo.enabled && (
-            <button type="button" className="btn" onClick={() => scan.mutate()} disabled={scan.isPending}>
+            <button type="button" className="btn-primary" onClick={() => scan.mutate()} disabled={scan.isPending}>
               Scan now
             </button>
           )}
@@ -94,27 +102,27 @@ const Repo = () => {
       </div>
 
       {repo.lastError && (
-        <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-900">
+        <div className="border border-flag-red/40 bg-flag-red-soft p-3 text-sm text-flag-red">
           <div className="font-medium">
             Last {repo.lastErrorSource} failed {timeAgo(repo.lastErrorAt)}
           </div>
           <div className="font-mono text-xs break-all">{repo.lastError}</div>
         </div>
       )}
-      {notice && <p className="text-sm text-gray-600">{notice}</p>}
+      {notice && <p className="text-sm text-muted">{notice}</p>}
       {(scan.error ?? setRubyMinor.error) && (
-        <p className="text-sm text-red-700">{errorMessage(scan.error ?? setRubyMinor.error)}</p>
+        <p className="text-sm text-flag-red">{errorMessage(scan.error ?? setRubyMinor.error)}</p>
       )}
 
       <div className="space-y-2">
-        <h2 className="font-semibold">
+        <h2 className="subheading">
           Findings{" "}
-          <span className="text-sm font-normal text-gray-500">
+          <span className="font-sans text-sm font-normal tracking-normal text-muted normal-case">
             ({pluralize(repo.resolvedCount, "resolved")} hidden)
           </span>
         </h2>
         {findings.length === 0 ? (
-          <p className="text-sm text-gray-500">Nothing outstanding.</p>
+          <p className="text-sm text-muted">Nothing outstanding.</p>
         ) : (
           <table className="table">
             <thead>
@@ -135,9 +143,9 @@ const Repo = () => {
       </div>
 
       <div className="space-y-2">
-        <h2 className="font-semibold">Pull requests</h2>
+        <h2 className="subheading">Pull requests</h2>
         {repo.pullRequests.length === 0 ? (
-          <p className="text-sm text-gray-500">None yet.</p>
+          <p className="text-sm text-muted">None yet.</p>
         ) : (
           <ul className="card space-y-1 text-sm">
             {repo.pullRequests.map((pr) => (
@@ -147,7 +155,7 @@ const Repo = () => {
                 </a>
                 <Badge tone={pr.state === "open" ? "blue" : pr.state === "merged" ? "green" : "gray"}>{pr.state}</Badge>
                 {pr.state === "open" && <CiBadge status={pr.ciStatus} />}
-                <span className="text-gray-500">
+                <span className="text-muted">
                   opened {timeAgo(pr.openedAt)}
                   {pr.mergedAt && `, merged ${timeAgo(pr.mergedAt)}`}
                 </span>
@@ -158,17 +166,17 @@ const Repo = () => {
       </div>
 
       <div className="space-y-2">
-        <h2 className="font-semibold">Recent activity</h2>
+        <h2 className="subheading">Recent activity</h2>
         {repo.events.length === 0 ? (
-          <p className="text-sm text-gray-500">No activity yet.</p>
+          <p className="text-sm text-muted">No activity yet.</p>
         ) : (
           <ul className="card space-y-1 text-sm">
             {repo.events.map((event) => (
               <li key={event.id} className="flex gap-2">
-                <span className="w-28 shrink-0 text-gray-500">{timeAgo(event.occurredAt)}</span>
+                <span className="w-28 shrink-0 text-muted">{timeAgo(event.occurredAt)}</span>
                 <span className="w-32 shrink-0">{EVENT_LABELS[event.kind] ?? event.kind}</span>
                 <span>
-                  <code>{event.packageName}</code> {event.advisoryIdentifier}
+                  <code>{event.packageName}</code> <code className="text-muted">{event.advisoryIdentifier}</code>
                 </span>
               </li>
             ))}
@@ -185,26 +193,28 @@ interface IFindingRow {
 
 const FindingRow = ({ finding }: IFindingRow) => (
   <tr>
-    <td>
+    <td className="whitespace-nowrap">
       <code>{finding.advisory.packageName}</code>
     </td>
     <td>
       {finding.advisory.url ? (
         <a href={finding.advisory.url} target="_blank" rel="noreferrer" className="hover:underline">
-          {finding.advisory.identifier}
+          <code>{finding.advisory.identifier}</code>
         </a>
       ) : (
-        finding.advisory.identifier
+        <code>{finding.advisory.identifier}</code>
       )}
-      {finding.advisory.title && <div className="text-gray-500">{finding.advisory.title}</div>}
+      {finding.advisory.title && <div className="text-muted">{finding.advisory.title}</div>}
     </td>
-    <td>{finding.lockedVersion}</td>
+    <td>
+      <code>{finding.lockedVersion}</code>
+    </td>
     <td className="space-y-1">
       <div className="space-x-1">
         <FindingStatusBadge status={finding.status} />
-        {finding.pullRequestNumber && <span className="text-gray-500">#{finding.pullRequestNumber}</span>}
+        {finding.pullRequestNumber && <span className="text-muted">#{finding.pullRequestNumber}</span>}
       </div>
-      {finding.reason && <div className="text-gray-600">{finding.reason}</div>}
+      {finding.reason && <div className="text-muted">{finding.reason}</div>}
     </td>
   </tr>
 )

@@ -23,8 +23,8 @@ const Advisories = () => {
   return (
     <section className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
-        <h1 className="text-xl font-semibold">Advisories</h1>
-        <span className="text-sm text-gray-500">From ruby-advisory-db, newest published first (up to 100)</span>
+        <h1 className="heading">Advisories</h1>
+        <span className="text-sm text-muted">From ruby-advisory-db, newest published first (up to 100)</span>
         <form onSubmit={handleSearch} className="ml-auto flex gap-2">
           <input
             className="input w-64"
@@ -39,9 +39,9 @@ const Advisories = () => {
       </div>
 
       {isPending ? (
-        <p className="text-sm text-gray-500">Loading…</p>
+        <p className="text-sm text-muted">Loading…</p>
       ) : advisories.length === 0 ? (
-        <p className="text-sm text-gray-500">No advisories match.</p>
+        <p className="text-sm text-muted">No advisories match.</p>
       ) : (
         <table className="table">
           <thead>
@@ -59,10 +59,10 @@ const Advisories = () => {
                 <td>
                   {advisory.url ? (
                     <a href={advisory.url} target="_blank" rel="noreferrer" className="hover:underline">
-                      {advisory.identifier}
+                      <code>{advisory.identifier}</code>
                     </a>
                   ) : (
-                    advisory.identifier
+                    <code>{advisory.identifier}</code>
                   )}
                   {advisory.criticality && (
                     <span className="ml-1">
@@ -73,13 +73,19 @@ const Advisories = () => {
                       </Badge>
                     </span>
                   )}
-                  {advisory.title && <div className="text-gray-500">{advisory.title}</div>}
+                  {advisory.title && <div className="text-muted">{advisory.title}</div>}
                 </td>
                 <td>
                   <code>{advisory.packageName}</code>
                 </td>
-                <td className="text-gray-600">{advisory.patchedVersions.join(", ") || "no fix yet"}</td>
-                <td className="text-gray-500">{advisory.publishedOn ?? timeAgo(advisory.firstSeenAt)}</td>
+                <td className="text-muted">
+                  {advisory.patchedVersions.length > 0 ? (
+                    <code>{advisory.patchedVersions.join(", ")}</code>
+                  ) : (
+                    "no fix yet"
+                  )}
+                </td>
+                <td className="text-muted">{advisory.publishedOn ?? timeAgo(advisory.firstSeenAt)}</td>
                 <td>{advisory.affectedRepositories ? `${advisory.affectedRepositories} repos` : "—"}</td>
               </tr>
             ))}

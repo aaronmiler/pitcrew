@@ -15,7 +15,7 @@ trigger CI (App token, not `GITHUB_TOKEN`).
 - Postgres + **GoodJob** (cron built in; no Redis)
 - Octokit + GitHub App (bot for repos/PRs, and OAuth for login)
 - Services inherit `ApplicationService`; rails commands via `docker compose exec`
-- Styling: minimal; theme later
+- Styling: Tailwind v4 "livery" theme (2026-11-23), all tokens in `frontend/entrypoints/application.css`; light/dark follow the system. Square corners, thin border lines, uppercase letter-spaced labels. Accent blue `#2a62d4`; header livery is a slanted deep-blue panel behind the wordmark with a pale pin and San Remo-green trim (our own colors, not a team's). Status colors follow racing flags (red open, yellow needs attention, green resolved, blue in PR). Fonts committed in `frontend/fonts/` (no outside requests): Inter body, Saira Condensed uppercase for page and section headings only (`.heading`/`.subheading`), JetBrains Mono for exact names (repos, gems, versions, advisory IDs) via `<code>`
 - Deploy: tars Docker stack (app, good_job worker, postgres; volumes for advisory DB + Rubies)
 
 ## Decisions
@@ -97,7 +97,7 @@ For both you and the team: a page plus a copyable summary.
 
 ## UI (minimal)
 
-- Repos: installation repos with an enabled toggle and "Scan now"; ecosystem badges (green = Pitcrew can fix it, `Repository::SUPPORTED_ECOSYSTEMS`), repos with a supported ecosystem sorted first, the rest dimmed. Repo sync detects them in one GraphQL query per 50 repos (`Github::DetectRepoFiles`: lockfile existence + `.ruby-version` text, no clone)
+- Repos: installation repos with an enabled toggle and "Scan now"; ecosystem badges (green = Pitcrew can fix it, `Repository::SUPPORTED_ECOSYSTEMS`), repos with a supported ecosystem sorted first, the rest dimmed. Repo sync detects them in one GraphQL query per 25 repos (was 50; GitHub 502s on the bigger query) (`Github::DetectRepoFiles`: lockfile existence + `.ruby-version` text, no clone)
 - Repo detail: findings, PR link + CI status, event timeline
 - Advisories: list with the repos affected
 - Credentials: CRUD (secret write-only)
@@ -120,7 +120,7 @@ For both you and the team: a page plus a copyable summary.
   - Scan → fix trigger: open findings; or an open PR plus a changed default lockfile (forced refresh, merges the default branch in) or resolved findings (may close the PR)
   - The installation token is sent to the resolver as `BUNDLE_GITHUB__COM` for private `github:` gem sources. The repo's Gemfile runs there and could read it; acceptable since the repos are ours and the token is short-lived and installation-scoped
   - Deferred: the `required_ruby_version` safety net (resolution already runs on the repo's Ruby minor, so a mismatch needs a patch-level Ruby constraint)
-- [ ] **5. UI**: Repos, Repo, Advisories, Access, Settings pages (plain Tailwind, theme later) + their API endpoints. Written 2026-11-22. No background polling (refresh after your own actions or via Refresh buttons); no retry action for needs_attention findings yet; no frontend test runner (API request specs + typecheck + a click-through)
+- [ ] **5. UI**: Repos, Repo, Advisories, Access, Settings pages (Tailwind; livery theme landed 2026-11-23) + their API endpoints. Written 2026-11-22. No background polling (refresh after your own actions or via Refresh buttons); no retry action for needs_attention findings yet; no frontend test runner (API request specs + typecheck + a click-through)
 - [x] **5.5. Keep current**: keep listed tooling gems (e.g. brakeman, whose `--ensure-latest` fails CI the day a release ships) at their latest release, in the same one PR per repo. Built 2026-11-22; specs green, verified live on aaronmiler/esther #2 (brakeman 8.0.5 → 8.1.1 committed on top of a human revert). Plan:
   - `Setting.keep_current_gems` (string array, empty by default; edited in Settings) and `Setting.tooling_pr_title_template` (default `chore(deps): update %{gems}`; same fields as `pr_title_template`). The security template is used whenever the PR fixes an advisory; the tooling one when it only bumps kept-current gems
   - `GemRelease` (`name` unique, `version`, `checked_at`): `GemReleasesJob` (hourly, and on saving the setting) reads rubygems.org `/api/v1/versions/<gem>/latest.json`. On a new version, enqueue FixRepositoryJob for enabled repos that are behind

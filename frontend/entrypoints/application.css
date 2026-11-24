@@ -1,26 +1,202 @@
 @import "tailwindcss";
 
-/* A few shared primitives, kept plain until there's a real theme. */
+/* Fonts are committed (latin subsets from Google Fonts, SIL Open Font License) so pages
+   make no requests to outside hosts. */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url("../fonts/inter-latin.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Saira Condensed";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("../fonts/saira-condensed-600-latin.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Saira Condensed";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../fonts/saira-condensed-700-latin.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400 500;
+  font-display: swap;
+  src: url("../fonts/jetbrains-mono-latin.woff2") format("woff2");
+}
+
+/* Pitcrew livery. Light values here; the dark block below swaps the same names, so
+   components only ever use these tokens (bg-canvas, text-muted, border-hairline, ...).
+   The header (chrome, livery) is dark in both themes. */
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Saira Condensed", "Arial Narrow", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --color-canvas: #f6f7f9;
+  --color-surface: #ffffff;
+  --color-surface-soft: #f0f2f5;
+  --color-ink: #15181c;
+  --color-body: #3a3f47;
+  --color-muted: #6b7280;
+  --color-hairline: #e3e6ea;
+  --color-hairline-strong: #cdd2d8;
+
+  --color-accent: #2a62d4;
+  --color-accent-hover: #2254bb;
+  --color-on-accent: #ffffff;
+
+  --color-chrome: #101215;
+  --color-on-chrome: #ffffff;
+  --color-on-chrome-soft: #9aa1ab;
+  --color-livery-panel: #1d4fae;
+  --color-livery-pin: #e8efe9;
+  --color-livery-trim: #5b9681;
+
+  /* Status, by racing flag: red open, yellow needs attention, green resolved, blue in PR. */
+  --color-flag-red: #a8231b;
+  --color-flag-red-soft: #fbe5e3;
+  --color-flag-yellow: #7a5a00;
+  --color-flag-yellow-soft: #fdf1c7;
+  --color-flag-green: #17703a;
+  --color-flag-green-soft: #ddf3e4;
+  --color-flag-blue: #1f4fae;
+  --color-flag-blue-soft: #e2ebfb;
+  --color-flag-gray: #4b525c;
+  --color-flag-gray-soft: #eceef1;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --color-canvas: #0b0c0e;
+    --color-surface: #15171a;
+    --color-surface-soft: #1c1f23;
+    --color-ink: #f2f4f7;
+    --color-body: #c4c9d0;
+    --color-muted: #a1a8b2;
+    --color-hairline: #2a2e34;
+    --color-hairline-strong: #3a3f47;
+
+    --color-accent: #4b80e6;
+    --color-accent-hover: #6693ea;
+
+    --color-chrome: #000000;
+    --color-on-chrome-soft: #a1a8b2;
+
+    --color-flag-red: #f08a82;
+    --color-flag-red-soft: #3a1513;
+    --color-flag-yellow: #f3cf5a;
+    --color-flag-yellow-soft: #362a06;
+    --color-flag-green: #6fd394;
+    --color-flag-green-soft: #0f2e1b;
+    --color-flag-blue: #8fb1f3;
+    --color-flag-blue-soft: #13244a;
+    --color-flag-gray: #aab1ba;
+    --color-flag-gray-soft: #23272c;
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-canvas font-sans text-body;
+  }
+  /* Exact names (gems, versions, advisory IDs, repos) are set in mono. */
+  code {
+    @apply font-mono text-[0.9em];
+  }
+}
+
 @layer components {
-  .btn {
-    @apply rounded border border-gray-300 bg-white px-2.5 py-1 text-sm hover:bg-gray-50 disabled:opacity-50;
+  /* Square corners, thin border lines, uppercase letter-spaced labels. */
+  .btn,
+  .btn-primary,
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-none border border-hairline-strong bg-surface px-3 py-1.5 text-[11.5px] font-semibold tracking-[0.1em] text-ink uppercase hover:bg-surface-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply border-accent bg-accent text-on-accent hover:bg-accent-hover;
   }
   .btn-danger {
-    @apply rounded border border-red-200 bg-white px-2.5 py-1 text-sm text-red-700 hover:bg-red-50 disabled:opacity-50;
+    @apply border-flag-red/40 text-flag-red hover:bg-flag-red-soft;
   }
   .input {
-    @apply rounded border border-gray-300 bg-white px-2 py-1 text-sm;
+    @apply rounded-none border border-hairline-strong bg-surface px-2 py-1 text-sm text-ink placeholder:text-muted focus:border-accent focus:outline-none;
   }
   .table {
-    @apply w-full overflow-hidden rounded border border-gray-200 bg-white text-left text-sm;
+    @apply w-full border border-hairline bg-surface text-left text-sm;
   }
   .table th {
-    @apply border-b border-gray-200 bg-gray-50 px-3 py-2 font-medium text-gray-600;
+    @apply border-b border-hairline bg-surface-soft px-3 py-2 text-[10.5px] font-semibold tracking-[0.1em] whitespace-nowrap text-muted uppercase;
   }
   .table td {
-    @apply border-b border-gray-100 px-3 py-2 align-top;
+    @apply border-b border-hairline px-3 py-2 align-top;
+  }
+  .table tr:last-child td {
+    @apply border-b-0;
   }
   .card {
-    @apply rounded border border-gray-200 bg-white p-4;
+    @apply border border-hairline bg-surface p-4;
+  }
+
+  /* Saira, sparingly: page titles and the main section headings. */
+  .heading {
+    @apply font-display text-[32px] leading-none font-semibold tracking-[0.02em] text-balance text-ink uppercase;
+  }
+  .subheading {
+    @apply font-display text-[19px] leading-tight font-semibold tracking-[0.04em] text-balance text-ink uppercase;
+  }
+  .label {
+    @apply text-[11px] font-semibold tracking-[0.12em] text-muted uppercase;
+  }
+  /* An exact name (repo, gem, version, advisory ID) inside a heading or prose. */
+  .name {
+    @apply font-mono text-[0.85em] font-medium tracking-normal text-ink normal-case;
+  }
+
+  /* Header livery: a slanted panel behind the wordmark that bleeds off the left edge, a
+     pale pin and a trim-colored slash after it, a panel-colored line along the bottom, and
+     a trim slash on that line under the current page. */
+  .livery {
+    @apply relative overflow-hidden bg-chrome text-on-chrome;
+    box-shadow: inset 0 -3px 0 var(--color-livery-panel);
+  }
+  .livery-brand {
+    @apply relative isolate -my-3 mr-4 py-3 pr-7 font-display text-[19px] leading-none font-bold tracking-[0.08em] uppercase;
+  }
+  .livery-brand::before {
+    content: "";
+    @apply absolute inset-y-0 right-0 -left-[100vw] -z-10 bg-livery-panel;
+    transform: skewX(-24deg);
+    transform-origin: top right;
+  }
+  .livery-brand::after {
+    content: "";
+    @apply absolute inset-y-0 -right-[19px] -z-10 w-[13px];
+    background: linear-gradient(
+      90deg,
+      var(--color-livery-pin) 0 3px,
+      transparent 3px 5px,
+      var(--color-livery-trim) 5px
+    );
+    transform: skewX(-24deg);
+    transform-origin: top right;
+  }
+  .livery-link {
+    @apply relative text-[11.5px] font-semibold tracking-[0.1em] text-on-chrome-soft uppercase hover:text-on-chrome;
+  }
+  .livery-link.active {
+    @apply text-on-chrome;
+  }
+  .livery-link.active::after {
+    content: "";
+    @apply absolute -inset-x-1.5 -bottom-3 h-1 bg-livery-trim;
+    transform: skewX(-24deg);
   }
 }

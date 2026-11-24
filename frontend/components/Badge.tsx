@@ -2,12 +2,13 @@ import type { CiStatus, FindingStatus, Repository } from "../types"
 
 type Tone = "gray" | "green" | "red" | "amber" | "blue"
 
+// Racing-flag colors (see the theme in application.css).
 const TONES: Record<Tone, string> = {
-  gray: "bg-gray-100 text-gray-700",
-  green: "bg-green-100 text-green-800",
-  red: "bg-red-100 text-red-800",
-  amber: "bg-amber-100 text-amber-800",
-  blue: "bg-blue-100 text-blue-800",
+  gray: "bg-flag-gray-soft text-flag-gray",
+  green: "bg-flag-green-soft text-flag-green",
+  red: "bg-flag-red-soft text-flag-red",
+  amber: "bg-flag-yellow-soft text-flag-yellow",
+  blue: "bg-flag-blue-soft text-flag-blue",
 }
 
 const FINDING: Record<FindingStatus, [string, Tone]> = {
@@ -29,7 +30,9 @@ interface IBadge {
 }
 
 const Badge = ({ tone = "gray", children }: IBadge) => (
-  <span className={`inline-block rounded px-1.5 py-0.5 text-xs font-medium whitespace-nowrap ${TONES[tone]}`}>
+  <span
+    className={`inline-block px-1.5 py-0.5 text-[10px] leading-4 font-bold tracking-[0.08em] whitespace-nowrap uppercase ${TONES[tone]}`}
+  >
     {children}
   </span>
 )

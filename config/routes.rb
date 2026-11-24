@@ -23,6 +23,10 @@ Rails.application.routes.draw do
     resources :repositories, only: %i[index show update] do
       post :scan, on: :member
       post :sync, on: :collection
+      # The Repo page's URL is /repos/owner/name. Repo names can contain dots, so the
+      # segments are constrained and the format isn't parsed from the path.
+      get "by_name/:owner/:name", action: :by_name, on: :collection, as: :by_name,
+        constraints: { owner: %r{[^/]+}, name: %r{[^/]+} }, format: false
     end
     resources :advisories, only: [:index]
     resources :job_failures, only: [:index]
@@ -34,8 +38,9 @@ Rails.application.routes.draw do
     mount GoodJob::Engine => "/good_job"
   end
 
-  # SPA catch-all: client-side routes (/repos/1, /settings, ...) load the app shell.
-  # Last, so it never shadows the routes above.
-  get "*path", to: "home#index",
+  # SPA catch-all: client-side routes (/repos/owner/name, /settings, ...) load the app shell.
+  # Last, so it never shadows the routes above. `format: false` so a dotted repo name
+  # (/repos/owner/foo.rb) isn't read as a file extension.
+  get "*path", to: "home#index", format: false,
     constraints: ->(req) { !req.xhr? && req.format.html? && !req.path.start_with?("/api/") }
 end

@@ -10,6 +10,15 @@ RSpec.describe "SPA routes", type: :request do
     expect(response.body).to include('id="root"')
   end
 
+  it "serves the app shell for a repo whose name has a dot" do
+    sign_in_as(create(:user))
+
+    get "/repos/aaronmiler/pitcrew.rb", headers: { "Accept" => "text/html" }
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include('id="root"')
+  end
+
   it "still requires sign-in" do
     get "/settings"
 

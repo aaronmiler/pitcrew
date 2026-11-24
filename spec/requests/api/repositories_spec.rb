@@ -65,6 +65,28 @@ RSpec.describe "Api::Repositories", type: :request do
     )
   end
 
+  describe "GET /api/repositories/by_name/:owner/:name" do
+    it "shows the repo by its full name, ignoring case" do
+      get "/api/repositories/by_name/AaronMiler/Esther"
+
+      expect(response.parsed_body).to include("id" => repository.id, "full_name" => "aaronmiler/esther")
+    end
+
+    it "finds names with dots" do
+      dotted = create(:repository, full_name: "aaronmiler/pitcrew.rb")
+
+      get "/api/repositories/by_name/aaronmiler/pitcrew.rb"
+
+      expect(response.parsed_body["id"]).to eq(dotted.id)
+    end
+
+    it "404s for a repo it doesn't know" do
+      get "/api/repositories/by_name/aaronmiler/nope"
+
+      expect(response).to have_http_status(:not_found)
+    end
+  end
+
   describe "PATCH /api/repositories/:id" do
     it "enables a repo and scans it right away" do
       repository.update!(enabled: false)
