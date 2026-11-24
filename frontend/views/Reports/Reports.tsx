@@ -1,9 +1,10 @@
-import { useQuery } from "@tanstack/react-query"
+import { keepPreviousData, useQuery } from "@tanstack/react-query"
 import { useState } from "react"
 import { Link } from "react-router"
 
 import Sparkline from "../../components/Sparkline"
 import { duration, percent, pluralize } from "../../lib/format"
+import { LIVE, useManualRefresh } from "../../lib/refresh"
 import { apiReports } from "../../lib/routes"
 import type { Report, ReportRange, ReportTotals, ReportWeek } from "../../types"
 
@@ -92,11 +93,13 @@ const Reports = () => {
     data: report,
     isPending,
     refetch,
-    isFetching,
   } = useQuery({
     queryKey: ["report", range],
     queryFn: () => apiReports.show<Report>({ query: { range } }),
+    placeholderData: keepPreviousData, // switching range keeps the old report up until the new one lands
+    ...LIVE,
   })
+  const { refresh, refreshing } = useManualRefresh(refetch)
 
   const handleCopy = async () => {
     if (!report) return
@@ -124,7 +127,7 @@ const Reports = () => {
               </button>
             ))}
           </div>
-          <button type="button" className="btn" onClick={() => refetch()} disabled={isFetching}>
+          <button type="button" className="btn" onClick={refresh} disabled={refreshing}>
             Refresh
           </button>
           <button type="button" className="btn" onClick={handleCopy} disabled={!report}>

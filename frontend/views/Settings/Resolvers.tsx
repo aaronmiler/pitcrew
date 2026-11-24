@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { Link } from "react-router"
 
 import Badge from "../../components/Badge"
+import { useManualRefresh } from "../../lib/refresh"
 import { apiResolvers } from "../../lib/routes"
 import type { Resolver, ResolverStatus } from "../../types"
 
@@ -36,18 +37,18 @@ const Resolvers = () => {
     data: resolvers = [],
     isPending,
     refetch,
-    isFetching,
   } = useQuery({
     queryKey: ["resolvers"],
     queryFn: () => apiResolvers.index<Resolver[]>(),
   })
+  const { refresh, refreshing } = useManualRefresh(refetch)
 
   return (
     <div className="card space-y-3">
       <div className="flex items-center gap-3">
         <h2 className="subheading">Resolvers</h2>
-        <button type="button" className="btn ml-auto" onClick={() => refetch()} disabled={isFetching}>
-          {isFetching ? "Checking…" : "Check again"}
+        <button type="button" className="btn ml-auto" onClick={refresh} disabled={refreshing}>
+          {refreshing ? "Checking…" : "Check again"}
         </button>
       </div>
       <p className="text-sm text-muted">

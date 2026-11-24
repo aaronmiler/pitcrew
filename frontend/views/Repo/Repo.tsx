@@ -5,6 +5,7 @@ import { Link, useNavigate, useParams } from "react-router"
 import Badge, { CiBadge, FindingStatusBadge } from "../../components/Badge"
 import { IncidentNote } from "../../components/ServiceStatus"
 import { errorMessage, pluralize, timeAgo } from "../../lib/format"
+import { LIVE, useManualRefresh } from "../../lib/refresh"
 import { apiRepositories } from "../../lib/routes"
 import type { Finding, FindingStatus, RepositoryDetail } from "../../types"
 
@@ -28,21 +29,22 @@ const Repo = () => {
     data: repo,
     isPending,
     refetch,
-    isFetching,
   } = useQuery({
     queryKey: ["repositories", id ?? `${owner}/${name}`],
     queryFn: () =>
       id
         ? apiRepositories.show<RepositoryDetail>({ params: { id } })
         : apiRepositories.byName<RepositoryDetail>({ params: { owner: owner!, name: name! } }),
+    ...LIVE,
   })
+  const { refresh, refreshing } = useManualRefresh(refetch)
 
   const queryClient = useQueryClient()
   const navigate = useNavigate()
 
   const scan = useMutation({
     mutationFn: () => apiRepositories.scan({ params: { id: repo!.id } }),
-    onSuccess: () => setNotice("Scan queued. Refresh in a moment to see results."),
+    onSuccess: () => setNotice("Scan queued. Results will appear here shortly."),
   })
   const setRubyMinor = useMutation({
     mutationFn: (rubyMinor: string) => apiRepositories.update({ params: { id: repo!.id }, data: { rubyMinor } }),
@@ -91,8 +93,8 @@ const Repo = () => {
           </label>
         </div>
         <div className="ml-auto flex gap-2">
-          <button type="button" className="btn" onClick={() => refetch()} disabled={isFetching}>
-            {isFetching ? "Refreshing…" : "Refresh"}
+          <button type="button" className="btn" onClick={refresh} disabled={refreshing}>
+            {refreshing ? "Refreshing…" : "Refresh"}
           </button>
           {repo.enabled && (
             <button type="button" className="btn-primary" onClick={() => scan.mutate()} disabled={scan.isPending}>

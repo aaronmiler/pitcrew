@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 
+import { LIVE } from "../lib/refresh"
 import { apiServiceIncidents } from "../lib/routes"
 import type { ServiceIncident, ServiceIncidentStatus } from "../types"
 
@@ -23,6 +24,7 @@ const ServiceStatus = () => {
   const { data: incidents = [] } = useQuery({
     queryKey: ["service_incidents"],
     queryFn: () => apiServiceIncidents.index<ServiceIncident[]>(),
+    ...LIVE,
   })
 
   if (incidents.length === 0) return null

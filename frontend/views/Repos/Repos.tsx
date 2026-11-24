@@ -5,6 +5,7 @@ import { Link } from "react-router"
 import Badge, { CiBadge, EcosystemBadges, RubyBadge, rubyMinor } from "../../components/Badge"
 import JobFailures from "../../components/JobFailures"
 import { errorMessage, timeAgo } from "../../lib/format"
+import { LIVE, useManualRefresh } from "../../lib/refresh"
 import { apiRepositories } from "../../lib/routes"
 import type { RepositoryListItem } from "../../types"
 
@@ -20,11 +21,14 @@ const Repos = () => {
     data: repositories = [],
     isPending,
     refetch,
-    isFetching,
   } = useQuery({
     queryKey: ["repositories"],
     queryFn: () => apiRepositories.index<RepositoryListItem[]>(),
+    ...LIVE,
   })
+  const { refresh, refreshing } = useManualRefresh(() =>
+    Promise.all([refetch(), queryClient.invalidateQueries({ queryKey: ["job_failures"] })])
+  )
 
   const visible = useMemo(
     () =>
@@ -51,18 +55,13 @@ const Repos = () => {
   })
   const scan = useMutation({
     mutationFn: (repo: RepositoryListItem) => apiRepositories.scan({ params: { id: repo.id } }),
-    onSuccess: (_, repo) => setNotice(`Scan queued for ${repo.fullName}. Refresh in a moment to see results.`),
+    onSuccess: (_, repo) => setNotice(`Scan queued for ${repo.fullName}. Results will appear here shortly.`),
   })
   const sync = useMutation({
     mutationFn: () => apiRepositories.sync(),
-    onSuccess: () => setNotice("Syncing repos from GitHub. Refresh in a moment."),
+    onSuccess: () => setNotice("Syncing repos from GitHub. New repos will appear here shortly."),
   })
   const error = errorMessage(toggle.error ?? scan.error ?? sync.error)
-
-  const handleRefresh = () => {
-    refetch()
-    queryClient.invalidateQueries({ queryKey: ["job_failures"] })
-  }
 
   return (
     <section className="space-y-4">
@@ -72,8 +71,8 @@ const Repos = () => {
           {enabledCount} of {repositories.length} enabled
         </span>
         <div className="ml-auto flex gap-2">
-          <button type="button" className="btn" onClick={handleRefresh} disabled={isFetching}>
-            {isFetching ? "Refreshing…" : "Refresh"}
+          <button type="button" className="btn" onClick={refresh} disabled={refreshing}>
+            {refreshing ? "Refreshing…" : "Refresh"}
           </button>
           <button type="button" className="btn" onClick={() => sync.mutate()} disabled={sync.isPending}>
             Sync repos from GitHub
