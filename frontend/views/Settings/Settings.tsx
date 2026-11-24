@@ -63,15 +63,15 @@ const Settings = () => {
 
   return (
     <section className="space-y-6">
-      <h1 className="text-xl font-semibold">Settings</h1>
+      <h1 className="heading">Settings</h1>
 
       <form onSubmit={handleSave} className="card space-y-3">
-        <h2 className="font-semibold">PR titles</h2>
+        <h2 className="subheading">PR titles</h2>
         <label className="block space-y-1">
           <span className="text-sm font-medium">Security (the PR fixes advisories)</span>
           <input className="input w-full font-mono" value={template} onChange={(e) => setTemplate(e.target.value)} />
           <span className="block text-sm">
-            <span className="text-gray-500">Preview: </span>
+            <span className="text-muted">Preview: </span>
             {renderTitle(template, SAMPLE)}
           </span>
         </label>
@@ -83,11 +83,11 @@ const Settings = () => {
             onChange={(e) => setToolingTemplate(e.target.value)}
           />
           <span className="block text-sm">
-            <span className="text-gray-500">Preview: </span>
+            <span className="text-muted">Preview: </span>
             {renderTitle(toolingTemplate, TOOLING_SAMPLE)}
           </span>
         </label>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-muted">
           Fields:{" "}
           {settings?.prTitleFields.map((field) => (
             <code key={field} className="mr-2">
@@ -95,9 +95,9 @@ const Settings = () => {
             </code>
           ))}
         </p>
-        {notice && <p className="text-sm text-gray-600">{notice}</p>}
-        {save.error && <p className="text-sm text-red-700">{errorMessage(save.error)}</p>}
-        <button type="submit" className="btn" disabled={save.isPending}>
+        {notice && <p className="text-sm text-muted">{notice}</p>}
+        {save.error && <p className="text-sm text-flag-red">{errorMessage(save.error)}</p>}
+        <button type="submit" className="btn-primary" disabled={save.isPending}>
           Save
         </button>
       </form>
@@ -135,15 +135,15 @@ const KeepCurrent = ({ settings }: { settings: ISettings | undefined }) => {
 
   return (
     <form onSubmit={handleSave} className="card space-y-3">
-      <h2 className="font-semibold">Keep current</h2>
-      <p className="text-sm text-gray-500">
+      <h2 className="subheading">Keep current</h2>
+      <p className="text-sm text-muted">
         Gems kept at their latest release, e.g. <code>brakeman</code> (its <code>--ensure-latest</code> fails CI the day
         a release ships). Bumps ride along in each repo&apos;s Pitcrew PR. Comma-separated.
       </p>
       <input className="input w-full font-mono" value={gems} onChange={(e) => setGems(e.target.value)} />
-      {notice && <p className="text-sm text-gray-600">{notice}</p>}
-      {save.error && <p className="text-sm text-red-700">{errorMessage(save.error)}</p>}
-      <button type="submit" className="btn" disabled={save.isPending}>
+      {notice && <p className="text-sm text-muted">{notice}</p>}
+      {save.error && <p className="text-sm text-flag-red">{errorMessage(save.error)}</p>}
+      <button type="submit" className="btn-primary" disabled={save.isPending}>
         Save
       </button>
     </form>
@@ -190,21 +190,21 @@ const Resolvers = () => {
   return (
     <div className="card space-y-3">
       <div className="flex items-center gap-3">
-        <h2 className="font-semibold">Resolvers</h2>
+        <h2 className="subheading">Resolvers</h2>
         <button type="button" className="btn ml-auto" onClick={() => refetch()} disabled={isFetching}>
           {isFetching ? "Checking…" : "Check again"}
         </button>
       </div>
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-muted">
         One sidecar per Ruby minor resolves lockfiles for the repos on it. To add one, add a service to{" "}
         <code>docker-compose.resolvers.yml</code> (or your stack) and its URL as <code>RESOLVER_RUBY_3_4</code>-style
         env var, then restart Pitcrew.
       </p>
 
       {isPending ? (
-        <p className="text-sm text-gray-500">Checking…</p>
+        <p className="text-sm text-muted">Checking…</p>
       ) : resolvers.length === 0 ? (
-        <p className="text-sm text-gray-500">No resolvers configured and no Ruby repos yet.</p>
+        <p className="text-sm text-muted">No resolvers configured and no Ruby repos yet.</p>
       ) : (
         <table className="table">
           <thead>
@@ -238,8 +238,8 @@ const Resolvers = () => {
                             .sort((a, b) => Number(b.enabled) - Number(a.enabled))
                             .map((repo) => (
                               <li key={repo.id}>
-                                <Link to={`/repos/${repo.id}`} className="hover:underline">
-                                  {repo.fullName}
+                                <Link to={`/repos/${repo.fullName}`} className="hover:underline">
+                                  <code>{repo.fullName}</code>
                                 </Link>
                                 {repo.enabled && (
                                   <span className="ml-1">
@@ -254,7 +254,7 @@ const Resolvers = () => {
                       "—"
                     )}
                   </td>
-                  <td className="text-sm text-gray-500">{resolverHint(resolver)}</td>
+                  <td className="text-sm text-muted">{resolverHint(resolver)}</td>
                 </tr>
               )
             })}
@@ -312,12 +312,12 @@ const Credentials = () => {
 
   return (
     <div className="card space-y-3">
-      <h2 className="font-semibold">Private gem sources</h2>
-      <p className="text-sm text-gray-500">
+      <h2 className="subheading">Private gem sources</h2>
+      <p className="text-sm text-muted">
         Credentials for private gem servers, e.g. <code>rubygems.pkg.github.com</code> (a PAT with read:packages) or{" "}
         <code>gems.contribsys.com</code> (<code>user:pass</code>). Stored encrypted and never shown again.
       </p>
-      {error && <p className="text-sm text-red-700">{error}</p>}
+      {error && <p className="text-sm text-flag-red">{error}</p>}
 
       {credentials.length > 0 && (
         <table className="table">
@@ -336,7 +336,7 @@ const Credentials = () => {
                 <td>
                   <code className="text-xs">{credential.envKey}</code>
                 </td>
-                <td className="text-gray-500">{timeAgo(credential.updatedAt)}</td>
+                <td className="text-muted">{timeAgo(credential.updatedAt)}</td>
                 <td className="text-right">
                   {replacing === credential.id ? (
                     <form onSubmit={(e) => handleReplace(e, credential.id)} className="flex justify-end gap-2">
@@ -348,7 +348,7 @@ const Credentials = () => {
                         onChange={(e) => setReplacement(e.target.value)}
                         autoComplete="off"
                       />
-                      <button type="submit" className="btn" disabled={replace.isPending}>
+                      <button type="submit" className="btn-primary" disabled={replace.isPending}>
                         Save
                       </button>
                       <button type="button" className="btn" onClick={() => setReplacing(null)}>
@@ -387,7 +387,7 @@ const Credentials = () => {
           onChange={(e) => setSecret(e.target.value)}
           autoComplete="off"
         />
-        <button type="submit" className="btn" disabled={create.isPending || !host || !secret}>
+        <button type="submit" className="btn-primary" disabled={create.isPending || !host || !secret}>
           Add
         </button>
       </form>

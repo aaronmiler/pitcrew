@@ -25,6 +25,8 @@ class RepositoryBlueprint < Blueprinter::Base
     # Configured resolver minors, newest first: the choices for ruby_minor.
     field(:resolver_minors) { Resolver::Client.endpoints.keys.sort_by { Gem::Version.new(it) }.reverse }
     field(:resolved_count) { |repo| repo.findings.resolved.count }
+    # A GitHub outage going on when the last scan or fix failed, if any.
+    field(:last_error_incident) { |repo| ServiceIncident.at_as_hash(repo.last_error_at) if repo.last_error }
     field(:findings) do |repo|
       FindingBlueprint.render_as_hash(
         repo.findings.where.not(status: "resolved").includes(:advisory, :fix_pull_request).order(:status, :detected_at)

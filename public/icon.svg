@@ -1,3 +1,11 @@
-<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="256" cy="256" r="256" fill="red"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 64 64">
+  <!-- Pitcrew livery tile P: the header's slanted blue panel, pale pin and San Remo slash, with a
+       condensed P drawn as a path (no font needed). -->
+  <rect width="64" height="64" fill="#101215"/>
+  <polygon points="0,0 46,0 17.5,64 0,64" fill="#1d4fae"/>
+  <polygon points="51,0 54,0 25.5,64 22.5,64" fill="#e8efe9"/>
+  <polygon points="56,0 64,0 64,4 35.5,64 27.5,64" fill="#5b9681"/>
+  <path fill="#ffffff" fill-rule="evenodd"
+    d="M6,16 H23 Q28,16 28,21 V31 Q28,36 23,36 H13.5 V48 H6 Z
+       M13.5,22.5 H19.5 Q20.5,22.5 20.5,23.5 V28.5 Q20.5,29.5 19.5,29.5 H13.5 Z"/>
 </svg>

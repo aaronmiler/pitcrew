@@ -57,12 +57,12 @@ const Access = () => {
 
   return (
     <section className="space-y-6">
-      <h1 className="text-xl font-semibold">Access</h1>
-      {notice && <p className="text-sm text-gray-600">{notice}</p>}
-      {error && <p className="text-sm text-red-700">{error}</p>}
+      <h1 className="heading">Access</h1>
+      {notice && <p className="text-sm text-muted">{notice}</p>}
+      {error && <p className="text-sm text-flag-red">{error}</p>}
 
       <div className="space-y-2">
-        <h2 className="font-semibold">People</h2>
+        <h2 className="subheading">People</h2>
         <table className="table">
           <thead>
             <tr>
@@ -75,8 +75,8 @@ const Access = () => {
             {users.map((user) => (
               <tr key={user.id}>
                 <td>
-                  @{user.githubLogin}
-                  {user.name && <span className="ml-1 text-gray-500">{user.name}</span>}
+                  <code>@{user.githubLogin}</code>
+                  {user.name && <span className="ml-1 text-muted">{user.name}</span>}
                 </td>
                 <td className="space-x-1">
                   <Badge tone={user.accessVia === "org" ? "blue" : "gray"}>
@@ -107,15 +107,15 @@ const Access = () => {
             value={login}
             onChange={(e) => setLogin(e.target.value)}
           />
-          <button type="submit" className="btn" disabled={invite.isPending}>
+          <button type="submit" className="btn-primary" disabled={invite.isPending}>
             Invite
           </button>
         </form>
       </div>
 
       <form onSubmit={handleSaveOrgs} className="card space-y-2">
-        <h2 className="font-semibold">Allowed orgs</h2>
-        <p className="text-sm text-gray-500">
+        <h2 className="subheading">Allowed orgs</h2>
+        <p className="text-sm text-muted">
           Members of these GitHub orgs can sign in. Membership is checked at every sign-in, and the GitHub App needs the
           org&rsquo;s &ldquo;Members: read&rdquo; permission.
         </p>
@@ -126,7 +126,7 @@ const Access = () => {
             value={orgs}
             onChange={(e) => setOrgs(e.target.value)}
           />
-          <button type="submit" className="btn" disabled={saveOrgs.isPending}>
+          <button type="submit" className="btn-primary" disabled={saveOrgs.isPending}>
             Save
           </button>
         </div>

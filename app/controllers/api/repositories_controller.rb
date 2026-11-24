@@ -14,6 +14,12 @@ module Api
       render json: RepositoryBlueprint.render(Repository.find(params[:id]), view: :detail)
     end
 
+    # GitHub treats owner/name case-insensitively, so links typed by hand still resolve.
+    def by_name
+      repository = Repository.where("LOWER(full_name) = LOWER(?)", "#{params[:owner]}/#{params[:name]}").first!
+      render json: RepositoryBlueprint.render(repository, view: :detail)
+    end
+
     # Only `enabled` and `ruby_minor` are editable. Enabling a repo scans it right away.
     def update
       repository = Repository.find(params[:id])

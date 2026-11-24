@@ -67,8 +67,8 @@ const Repos = () => {
   return (
     <section className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
-        <h1 className="text-xl font-semibold">Repos</h1>
-        <span className="text-sm text-gray-500">
+        <h1 className="heading">Repos</h1>
+        <span className="text-sm text-muted">
           {enabledCount} of {repositories.length} enabled
         </span>
         <div className="ml-auto flex gap-2">
@@ -95,13 +95,13 @@ const Repos = () => {
       </div>
 
       <JobFailures />
-      {notice && <p className="text-sm text-gray-600">{notice}</p>}
-      {error && <p className="text-sm text-red-700">{error}</p>}
+      {notice && <p className="text-sm text-muted">{notice}</p>}
+      {error && <p className="text-sm text-flag-red">{error}</p>}
 
       {isPending ? (
-        <p className="text-sm text-gray-500">Loading…</p>
+        <p className="text-sm text-muted">Loading…</p>
       ) : visible.length === 0 ? (
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-muted">
           {filter === "enabled" ? "No enabled repos yet. Switch to “All repos” to enable some." : "No repos match."}
         </p>
       ) : (
@@ -125,8 +125,8 @@ const Repos = () => {
                 }
               >
                 <td>
-                  <Link to={`/repos/${repo.id}`} className="font-medium hover:underline">
-                    {repo.fullName}
+                  <Link to={`/repos/${repo.fullName}`} className="font-medium hover:underline">
+                    <code>{repo.fullName}</code>
                   </Link>
                   <span className="ml-2 space-x-1">
                     <EcosystemBadges repo={repo} />
@@ -159,7 +159,7 @@ const Repos = () => {
                     </>
                   )}
                 </td>
-                <td className="text-gray-500">
+                <td className="text-muted">
                   {repo.enabled ? timeAgo(repo.lastScannedAt) : "—"}
                   {repo.lastError && (
                     <div title={repo.lastError}>

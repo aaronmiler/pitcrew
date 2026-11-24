@@ -49,6 +49,15 @@ RSpec.describe Github::DetectRepoFiles do
     expect(a_request(:post, "#{api}/graphql")).to have_been_made.twice
   end
 
+  it "skips a batch GitHub errors on and keeps going" do
+    stub_request(:post, "#{api}/graphql")
+      .to_return({ status: 502, body: "Bad Gateway" }, json_response({ data: { r0: { bundler: { oid: "a" } } } }))
+
+    result = described_class.call(client:, full_names: Array.new(described_class::BATCH + 1) { "aaronmiler/repo-#{it}" })
+
+    expect(result).to eq("aaronmiler/repo-#{described_class::BATCH}" => { ecosystems: %w[bundler], ruby: nil })
+  end
+
   it "leaves out repos GitHub couldn't resolve" do
     stub_request(:post, "#{api}/graphql").to_return(json_response({ data: { r0: nil }, errors: [{ type: "NOT_FOUND" }] }))
 

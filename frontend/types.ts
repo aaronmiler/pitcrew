@@ -92,6 +92,7 @@ export interface RepositoryListItem extends Repository {
 export interface RepositoryDetail extends Repository {
   resolverMinors: string[]
   resolvedCount: number
+  lastErrorIncident: ServiceIncident | null
   findings: Finding[]
   pullRequests: PullRequest[]
   events: FindingEvent[]
@@ -108,6 +109,21 @@ export interface JobFailure {
   jobClass: string
   error: string
   finishedAt: string
+  incident: ServiceIncident | null
+}
+
+export type ServiceIncidentStatus = "degraded_performance" | "partial_outage" | "major_outage" | "under_maintenance"
+
+// An outage of a GitHub component Pitcrew depends on, from githubstatus.com.
+export interface ServiceIncident {
+  id: number
+  source: string
+  component: string
+  status: ServiceIncidentStatus
+  incidentName: string | null
+  incidentUrl: string | null
+  startedAt: string
+  resolvedAt: string | null
 }
 
 export type ResolverStatus = "ok" | "unreachable" | "mismatch" | "missing" | "unknown"

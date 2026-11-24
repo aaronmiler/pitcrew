@@ -22,7 +22,8 @@ const router = createBrowserRouter([
     element: <Layout />,
     children: [
       { index: true, element: <Repos /> },
-      { path: "repos/:id", element: <Repo /> },
+      { path: "repos/:owner/:name", element: <Repo /> },
+      { path: "repos/:id", element: <Repo /> }, // old links; redirects to the owner/name URL
       { path: "advisories", element: <Advisories /> },
       { path: "access", element: <Access /> },
       { path: "settings", element: <Settings /> },

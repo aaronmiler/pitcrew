@@ -1,0 +1,23 @@
+{
+  "page": { "id": "kctbh9vrtdwd", "name": "GitHub", "url": "https://www.githubstatus.com" },
+  "status": { "indicator": "minor", "description": "Partially Degraded Service" },
+  "components": [
+    { "id": "8l4ygp009s5s", "name": "Git Operations", "status": "operational" },
+    { "id": "brv1bkgrwx7q", "name": "API Requests", "status": "degraded_performance" },
+    { "id": "4230lsnqdsld", "name": "Webhooks", "status": "major_outage" },
+    { "id": "kr09ddfgbfsf", "name": "Issues", "status": "operational" },
+    { "id": "hhtssxt0f5v2", "name": "Pull Requests", "status": "operational" },
+    { "id": "br0l2tvcx85d", "name": "Actions", "status": "partial_outage" },
+    { "id": "st3j38cctv9l", "name": "Packages", "status": "operational" }
+  ],
+  "incidents": [
+    {
+      "id": "x1",
+      "name": "Disruption with some GitHub services",
+      "status": "investigating",
+      "shortlink": "https://stspg.io/abc123",
+      "components": [{ "id": "brv1bkgrwx7q", "name": "API Requests", "status": "degraded_performance" }]
+    }
+  ],
+  "scheduled_maintenances": []
+}

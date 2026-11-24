@@ -4,7 +4,8 @@ Keeps Ruby dependencies free of known CVEs so `bundle audit` never blocks a depl
 Polls ruby-advisory-db, scans selected GitHub repos, makes the smallest lockfile change
 that clears each advisory, and opens one PR per repo. Replaces Dependabot.
 
-`PLAN.md` holds the design, the decisions, and the milestone checklist. Read it before
+`PLAN.md` holds the design, the decisions, and the milestone checklist. It's local only
+(gitignored), so it may not exist in a fresh clone. When it does, read it before
 non-trivial work and tick milestones off as they land.
 
 Built from [sapling](https://github.com/aaronmiler/sapling). Style config (RuboCop,
