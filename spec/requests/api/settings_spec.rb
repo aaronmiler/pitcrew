@@ -13,8 +13,18 @@ RSpec.describe "Api::Settings", type: :request do
       "tooling_pr_title_template" => "chore(deps): update %{gems}",
       "allowed_orgs" => [],
       "keep_current_gems" => [],
-      "pr_title_fields" => %w[count advisories gems gem_count ids repo date]
+      "pr_title_fields" => %w[count advisories gems gem_count ids repo date],
+      "branch_separator" => ".",
+      "branch_separators" => %w[/ . - _]
     )
+  end
+
+  it "updates the branch separator and rejects an unknown one" do
+    patch "/api/settings", params: { setting: { branch_separator: "-" } }, as: :json
+    expect(Setting.current.branch_separator).to eq("-")
+
+    patch "/api/settings", params: { setting: { branch_separator: "+" } }, as: :json
+    expect(response).to have_http_status(:unprocessable_content)
   end
 
   it "updates the title template and allowed orgs" do

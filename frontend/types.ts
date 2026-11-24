@@ -17,6 +17,8 @@ export interface Settings {
   prTitleFields: string[]
   manualFixMinutesLow: number
   manualFixMinutesHigh: number
+  branchSeparator: string
+  branchSeparators: string[]
 }
 
 export type FindingStatus = "open" | "in_pr" | "needs_attention" | "resolved"

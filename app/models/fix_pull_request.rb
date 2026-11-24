@@ -1,5 +1,7 @@
 class FixPullRequest < ApplicationRecord
-  BRANCH_PREFIX = "pitcrew/".freeze
+  # "pitcrew" plus one of Setting::BRANCH_SEPARATORS. Any of them, not just the current
+  # setting, so PRs opened before a change keep working.
+  BRANCH_PREFIX = %r{\Apitcrew[/._-]}
 
   belongs_to :repository
   has_many :findings, dependent: :nullify
@@ -11,12 +13,17 @@ class FixPullRequest < ApplicationRecord
 
   validates :number, presence: true, uniqueness: { scope: :repository_id }
   validates :branch, :opened_at, presence: true
-  validates :branch, format: { with: /\A#{Regexp.escape(BRANCH_PREFIX)}/ }
+  validates :branch, format: { with: BRANCH_PREFIX }
   validate :one_open_per_repository, if: :open?
 
-  # e.g. "pitcrew/security-20261121-1432"
-  def self.branch_name(at: Time.current)
-    "#{BRANCH_PREFIX}security-#{at.utc.strftime('%Y%m%d-%H%M')}"
+  # e.g. "pitcrew.security-20261121", or "pitcrew.security-20261121-2" for the repo's second
+  # PR that day (the first one's branch may still exist).
+  def self.branch_name(repository:, at: Time.current)
+    base = "pitcrew#{Setting.current.branch_separator}security-#{at.utc.strftime('%Y%m%d')}"
+    taken = repository.fix_pull_requests.where("branch LIKE ?", "#{sanitize_sql_like(base)}%").pluck(:branch)
+    return base unless taken.include?(base)
+
+    (2..).lazy.map { "#{base}-#{it}" }.find { !taken.include?(it) }
   end
 
   private

@@ -5,7 +5,7 @@ module Github
   #   - open PR: base is the PR branch's head, so everything already on it (people's commits,
   #     merges of the default branch) carries forward; the ref moves fast-forward only, so a
   #     push that lands mid-run makes this fail instead of being overwritten
-  # Only pitcrew/* refs are ever written. Returns the commit sha, or nil when the PR branch
+  # Only Pitcrew's own refs are ever written. Returns the commit sha, or nil when the PR branch
   # already has exactly this lockfile (nothing to commit).
   class CommitLockfile < ApplicationService
     def call(client:, repository:, branch:, lockfile:, base:, message:, new_branch:)

@@ -1,5 +1,5 @@
 # Refreshes a Pitcrew PR from GitHub: CI status (of GitHub's head) while it's open; once it's
-# merged or closed, records that (with events) and deletes its pitcrew/* branch.
+# merged or closed, records that (with events) and deletes its pitcrew branch.
 # head_sha is deliberately left alone: it's the head Pitcrew last left the branch at, set by
 # RepositoryFix, so PullRequestSyncJob can tell when someone else pushed.
 #   merged -> findings stay in_pr until the next scan sees the new lockfile and resolves them

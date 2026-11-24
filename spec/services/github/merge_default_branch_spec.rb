@@ -43,7 +43,7 @@ RSpec.describe Github::MergeDefaultBranch do
     expect { merge }.to raise_error(described_class::Conflict, /Merge it by hand/)
   end
 
-  it "refuses to merge into anything but a pitcrew/ branch" do
+  it "refuses to merge into anything but a pitcrew branch" do
     expect { described_class.call(client:, repository:, branch: "main") }.to raise_error(ArgumentError)
   end
 end

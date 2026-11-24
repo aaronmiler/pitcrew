@@ -4,6 +4,7 @@ class Setting < ApplicationRecord
   PR_TITLE_FIELDS = %i[count advisories gems gem_count ids repo date].freeze
   TITLE_TEMPLATES = %i[pr_title_template tooling_pr_title_template].freeze
   FIELD_PATTERN = /%\{(\w+)\}/
+  BRANCH_SEPARATORS = %w[/ . - _].freeze # FixPullRequest::BRANCH_PREFIX accepts each
   GEM_NAME = /\A[A-Za-z0-9][A-Za-z0-9._-]{0,100}\z/ # goes into a rubygems.org URL path
 
   normalizes :allowed_orgs, with: ->(orgs) { orgs.map { it.to_s.strip.downcase }.compact_blank.uniq }
@@ -12,6 +13,7 @@ class Setting < ApplicationRecord
   validates(*TITLE_TEMPLATES, presence: true)
   validate :title_template_fields_known
   validate :keep_current_gems_are_gem_names
+  validates :branch_separator, inclusion: { in: BRANCH_SEPARATORS }
   validates :manual_fix_minutes_low, numericality: { only_integer: true, greater_than: 0 }
   validates :manual_fix_minutes_high, numericality: { only_integer: true, greater_than_or_equal_to: :manual_fix_minutes_low }
 

@@ -120,7 +120,7 @@ class RepositoryFix < ApplicationService
       blocked: outcome.blocked, kept_current: outcome.kept
     )
     kind = @pull_request ? "pr_updated" : "pr_opened"
-    branch = @pull_request&.branch || FixPullRequest.branch_name
+    branch = @pull_request&.branch || FixPullRequest.branch_name(repository: @repository)
     sha = Github::CommitLockfile.call(
       client: @client, repository: @repository, branch:, lockfile: updated, base:,
       message: outcome.update_message || content.title, new_branch: @pull_request.nil?
