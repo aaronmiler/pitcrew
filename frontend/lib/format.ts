@@ -26,3 +26,16 @@ export const errorMessage = (error: unknown): string | null => {
   const body = (error as { body?: { errors?: string[]; error?: string } }).body
   return body?.errors?.join(" ") ?? body?.error ?? "Something went wrong."
 }
+
+// A duration in seconds, at one sensible unit: "45 min", "5.2 h", "3.1 days". Signed.
+export const duration = (seconds: number | null | undefined): string => {
+  if (seconds === null || seconds === undefined) return "—"
+  const sign = seconds < 0 ? "−" : ""
+  const abs = Math.abs(seconds)
+  if (abs < 3600) return `${sign}${Math.round(abs / 60)} min`
+  if (abs < 48 * 3600) return `${sign}${(abs / 3600).toFixed(1)} h`
+  return `${sign}${(abs / 86400).toFixed(1)} days`
+}
+
+export const percent = (rate: number | null | undefined): string =>
+  rate === null || rate === undefined ? "—" : `${Math.round(rate * 100)}%`

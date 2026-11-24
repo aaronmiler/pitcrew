@@ -9,6 +9,7 @@ import ServiceStatus from "./ServiceStatus"
 const LINKS = [
   { to: "/", label: "Repos", end: true, also: "/repos/" },
   { to: "/advisories", label: "Advisories", end: false },
+  { to: "/reports", label: "Reports", end: false },
   { to: "/access", label: "Access", end: false },
   { to: "/settings", label: "Settings", end: false },
 ]

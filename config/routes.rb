@@ -29,6 +29,7 @@ Rails.application.routes.draw do
         constraints: { owner: %r{[^/]+}, name: %r{[^/]+} }, format: false
     end
     resources :advisories, only: [:index]
+    resource :report, only: [:show]
     resources :job_failures, only: [:index]
     resources :service_incidents, only: [:index]
     resources :resolvers, only: [:index]

@@ -15,6 +15,8 @@ export interface Settings {
   allowedOrgs: string[]
   keepCurrentGems: string[]
   prTitleFields: string[]
+  manualFixMinutesLow: number
+  manualFixMinutesHigh: number
 }
 
 export type FindingStatus = "open" | "in_pr" | "needs_attention" | "resolved"
@@ -135,4 +137,57 @@ export interface Resolver {
   status: ResolverStatus
   reported: string | null
   repos: { id: number; fullName: string; enabled: boolean }[]
+}
+
+export type ReportRange = "30d" | "90d" | "all"
+
+// Durations are seconds; null when there's nothing to measure.
+export interface ReportTotals {
+  closed: number
+  autoFixed: number
+  needsAttention: number
+  autoFixRate: number | null
+  prsMerged: number
+  detectedToMerged: number | null
+  minutesSaved: [number, number]
+}
+
+export interface ReportStage {
+  median: number | null
+  count: number
+}
+
+export interface ReportWeek {
+  weekStart: string
+  closed: number
+  autoFixed: number
+  needsAttention: number
+  autoFixRate: number | null
+  detectedToMerged: number | null
+}
+
+export interface ReportRepo {
+  id: number
+  fullName: string
+  closed: number
+  autoFixed: number
+  needsAttention: number
+  openNow: number
+  detectedToMerged: number | null
+}
+
+export interface Report {
+  range: ReportRange
+  since: string | null
+  until: string
+  reposCovered: number
+  totals: ReportTotals
+  previous: ReportTotals | null
+  exposure: Record<
+    "publishedToDetected" | "detectedToPr" | "prToMerged" | "detectedToMerged" | "publishedToMerged",
+    ReportStage
+  >
+  headStart: { median: number | null; count: number; ahead: number; behind: number }
+  trend: ReportWeek[]
+  repos: ReportRepo[]
 }

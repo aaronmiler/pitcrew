@@ -80,6 +80,17 @@ RSpec.describe Setting, type: :model do
     end
   end
 
+  describe "manual fix minutes" do
+    it "defaults to 15–30" do
+      expect(described_class.current).to have_attributes(manual_fix_minutes_low: 15, manual_fix_minutes_high: 30)
+    end
+
+    it "needs a positive low end no higher than the high end" do
+      expect(build(:setting, manual_fix_minutes_low: 0)).not_to be_valid
+      expect(build(:setting, manual_fix_minutes_low: 40, manual_fix_minutes_high: 30)).not_to be_valid
+    end
+  end
+
   describe "keep_current_gems" do
     it "defaults to none" do
       expect(described_class.current.keep_current_gems).to eq([])

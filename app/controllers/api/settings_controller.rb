@@ -18,7 +18,8 @@ module Api
 
     def setting_params
       params.expect(setting: [
-        :pr_title_template, :tooling_pr_title_template, { allowed_orgs: [], keep_current_gems: [] }
+        :pr_title_template, :tooling_pr_title_template, :manual_fix_minutes_low, :manual_fix_minutes_high,
+        { allowed_orgs: [], keep_current_gems: [] }
       ])
     end
   end

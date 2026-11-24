@@ -12,6 +12,8 @@ class Setting < ApplicationRecord
   validates(*TITLE_TEMPLATES, presence: true)
   validate :title_template_fields_known
   validate :keep_current_gems_are_gem_names
+  validates :manual_fix_minutes_low, numericality: { only_integer: true, greater_than: 0 }
+  validates :manual_fix_minutes_high, numericality: { only_integer: true, greater_than_or_equal_to: :manual_fix_minutes_low }
 
   def self.current
     first_or_create!
