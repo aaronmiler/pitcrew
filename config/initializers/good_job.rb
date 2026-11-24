@@ -21,6 +21,11 @@ Rails.application.configure do
       class: "GemReleasesJob",
       description: "Check rubygems.org for new releases of kept-current gems"
     },
+    github_status: {
+      cron: "*/5 * * * *", # ServiceIncident::POLL_INTERVAL
+      class: "GithubStatusJob",
+      description: "Record outages of the GitHub components Pitcrew depends on"
+    },
     scan_repositories: {
       cron: "7-59/15 * * * *", # offset from the advisory sync
       class: "ScanRepositoriesJob",

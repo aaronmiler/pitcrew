@@ -30,6 +30,7 @@ Rails.application.routes.draw do
     end
     resources :advisories, only: [:index]
     resources :job_failures, only: [:index]
+    resources :service_incidents, only: [:index]
     resources :resolvers, only: [:index]
     resources :gem_source_credentials, only: %i[index create update destroy]
   end

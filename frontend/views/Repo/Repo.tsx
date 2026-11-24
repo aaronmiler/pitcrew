@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router"
 
 import Badge, { CiBadge, FindingStatusBadge } from "../../components/Badge"
+import { IncidentNote } from "../../components/ServiceStatus"
 import { errorMessage, pluralize, timeAgo } from "../../lib/format"
 import { apiRepositories } from "../../lib/routes"
 import type { Finding, FindingStatus, RepositoryDetail } from "../../types"
@@ -107,6 +108,7 @@ const Repo = () => {
             Last {repo.lastErrorSource} failed {timeAgo(repo.lastErrorAt)}
           </div>
           <div className="font-mono text-xs break-all">{repo.lastError}</div>
+          {repo.lastErrorIncident && <IncidentNote incident={repo.lastErrorIncident} />}
         </div>
       )}
       {notice && <p className="text-sm text-muted">{notice}</p>}

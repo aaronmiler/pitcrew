@@ -3,6 +3,7 @@ import { NavLink, Outlet, useLocation } from "react-router"
 
 import { apiSessions } from "../lib/routes"
 import type { User } from "../types"
+import ServiceStatus from "./ServiceStatus"
 
 // `also`: a path prefix that marks the link current too (a repo's page lives under /repos/).
 const LINKS = [
@@ -51,6 +52,7 @@ const Layout = () => {
           )}
         </nav>
       </header>
+      <ServiceStatus />
       <main className="mx-auto max-w-6xl px-4 py-6">
         <Outlet />
       </main>

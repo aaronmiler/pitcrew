@@ -21,4 +21,16 @@ RSpec.describe "Api::JobFailures", type: :request do
       ["ScanRepositoryJob", "older failure"]
     ])
   end
+
+  it "notes a GitHub outage that was going on when a job failed" do
+    create(:service_incident, component: "API Requests", started_at: 2.hours.ago, resolved_at: 30.minutes.ago)
+    good_job(error: "Octokit::BadGateway", finished_at: 1.hour.ago)
+    good_job(error: "unrelated", finished_at: 10.minutes.ago)
+
+    get "/api/job_failures"
+
+    incidents = response.parsed_body.pluck("error", "incident").to_h
+    expect(incidents["Octokit::BadGateway"]).to include("component" => "API Requests", "status" => "degraded_performance")
+    expect(incidents["unrelated"]).to be_nil
+  end
 end

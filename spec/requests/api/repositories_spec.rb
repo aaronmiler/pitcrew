@@ -65,6 +65,15 @@ RSpec.describe "Api::Repositories", type: :request do
     )
   end
 
+  it "notes a GitHub outage that was going on when the last scan failed" do
+    create(:service_incident, component: "Git Operations", status: "major_outage", started_at: 1.hour.ago)
+    repository.update!(last_error: "Command::Error: git clone failed", last_error_at: 20.minutes.ago, last_error_source: "scan")
+
+    get "/api/repositories/#{repository.id}"
+
+    expect(response.parsed_body["last_error_incident"]).to include("component" => "Git Operations", "status" => "major_outage")
+  end
+
   describe "GET /api/repositories/by_name/:owner/:name" do
     it "shows the repo by its full name, ignoring case" do
       get "/api/repositories/by_name/AaronMiler/Esther"

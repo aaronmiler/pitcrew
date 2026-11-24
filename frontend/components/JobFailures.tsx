@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query"
 import { timeAgo } from "../lib/format"
 import { apiJobFailures } from "../lib/routes"
 import type { JobFailure } from "../types"
+import { IncidentNote } from "./ServiceStatus"
 
 // Background jobs that failed in the last 24 hours. Hidden when there are none.
 const JobFailures = () => {
@@ -24,6 +25,7 @@ const JobFailures = () => {
             <span className="font-medium">{failure.jobClass}</span>{" "}
             <span className="text-flag-red">{timeAgo(failure.finishedAt)}</span>
             <div className="font-mono text-xs break-all">{failure.error}</div>
+            {failure.incident && <IncidentNote incident={failure.incident} />}
           </li>
         ))}
       </ul>

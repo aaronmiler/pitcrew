@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_23_020000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_24_050000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -229,6 +229,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_020000) do
     t.string "ruby_minor"
     t.index ["full_name"], name: "index_repositories_on_full_name", unique: true
     t.index ["github_id"], name: "index_repositories_on_github_id", unique: true
+  end
+
+  create_table "service_incidents", force: :cascade do |t|
+    t.string "source", null: false
+    t.string "component", null: false
+    t.string "status", null: false
+    t.string "incident_name"
+    t.string "incident_url"
+    t.datetime "started_at", null: false
+    t.datetime "resolved_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["source", "component"], name: "index_service_incidents_one_open_per_component", unique: true, where: "(resolved_at IS NULL)"
+    t.index ["started_at", "resolved_at"], name: "index_service_incidents_on_started_at_and_resolved_at"
   end
 
   create_table "settings", force: :cascade do |t|
