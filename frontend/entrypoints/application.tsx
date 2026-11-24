@@ -6,6 +6,7 @@ import { createBrowserRouter, RouterProvider } from "react-router"
 import Layout from "../components/Layout"
 import Access from "../views/Access/Access"
 import Advisories from "../views/Advisories/Advisories"
+import Reports from "../views/Reports/Reports"
 import Repo from "../views/Repo/Repo"
 import Repos from "../views/Repos/Repos"
 import Settings from "../views/Settings/Settings"
@@ -25,6 +26,7 @@ const router = createBrowserRouter([
       { path: "repos/:owner/:name", element: <Repo /> },
       { path: "repos/:id", element: <Repo /> }, // old links; redirects to the owner/name URL
       { path: "advisories", element: <Advisories /> },
+      { path: "reports", element: <Reports /> },
       { path: "access", element: <Access /> },
       { path: "settings", element: <Settings /> },
     ],

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_24_050000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_24_060000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -253,6 +253,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_24_050000) do
     t.datetime "updated_at", null: false
     t.string "keep_current_gems", default: [], null: false, array: true
     t.string "tooling_pr_title_template", default: "chore(deps): update %{gems}", null: false
+    t.integer "manual_fix_minutes_low", default: 15, null: false
+    t.integer "manual_fix_minutes_high", default: 30, null: false
     t.index ["singleton"], name: "index_settings_on_singleton", unique: true
   end
 
