@@ -4,7 +4,7 @@ class Setting < ApplicationRecord
   PR_TITLE_FIELDS = %i[count advisories gems gem_count ids repo date].freeze
   TITLE_TEMPLATES = %i[pr_title_template tooling_pr_title_template].freeze
   FIELD_PATTERN = /%\{(\w+)\}/
-  BRANCH_SEPARATORS = %w[/ . - _].freeze # FixPullRequest::BRANCH_PREFIX accepts each
+  BRANCH_SEPARATORS = %w[/ . - _].freeze # FixPullRequest::BRANCH_PATTERN accepts each
   GEM_NAME = /\A[A-Za-z0-9][A-Za-z0-9._-]{0,100}\z/ # goes into a rubygems.org URL path
 
   normalizes :allowed_orgs, with: ->(orgs) { orgs.map { it.to_s.strip.downcase }.compact_blank.uniq }

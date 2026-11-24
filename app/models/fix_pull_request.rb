@@ -1,7 +1,7 @@
 class FixPullRequest < ApplicationRecord
-  # "pitcrew" plus one of Setting::BRANCH_SEPARATORS. Any of them, not just the current
-  # setting, so PRs opened before a change keep working.
-  BRANCH_PREFIX = %r{\Apitcrew[/._-]}
+  # "pitcrew", one of Setting::BRANCH_SEPARATORS, then a plain branch-safe name. Any
+  # separator, not just the current setting, so PRs opened before a change keep working.
+  BRANCH_PATTERN = %r{\Apitcrew[/._-][A-Za-z0-9._/-]+\z}
 
   belongs_to :repository
   has_many :findings, dependent: :nullify
@@ -13,7 +13,7 @@ class FixPullRequest < ApplicationRecord
 
   validates :number, presence: true, uniqueness: { scope: :repository_id }
   validates :branch, :opened_at, presence: true
-  validates :branch, format: { with: BRANCH_PREFIX }
+  validates :branch, format: { with: BRANCH_PATTERN }
   validate :one_open_per_repository, if: :open?
 
   # e.g. "pitcrew.security-20261121", or "pitcrew.security-20261121-2" for the repo's second

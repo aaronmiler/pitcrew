@@ -32,7 +32,7 @@ rules there, not here.
   Refs move fast-forward only, never force-pushed. Re-check the PR's state on GitHub
   before deciding to update it or open a new one; the DB copy can be stale.
 - Pitcrew only creates, pushes to, or deletes its own branches: `pitcrew` plus one of
-  `/ . - _` (`FixPullRequest::BRANCH_PREFIX`; the separator for new ones is a `Setting`).
+  `/ . - _` (`FixPullRequest::BRANCH_PATTERN`; the separator for new ones is a `Setting`).
 - ruby-advisory-db is the detection source of truth; the `advisories` table indexes it.
 - Gem source credentials live encrypted in the DB and reach the resolver per request as
   `BUNDLE_<HOST>` env. Never write them to a clone or a log.

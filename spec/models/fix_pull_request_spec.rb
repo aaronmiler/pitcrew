@@ -13,6 +13,12 @@ RSpec.describe FixPullRequest, type: :model do
     expect(build(:fix_pull_request, branch: "pitcrewx-security-1")).not_to be_valid
   end
 
+  it "rejects anything after the prefix that isn't a plain branch name" do
+    ["pitcrew/", "pitcrew/a b", "pitcrew/x\nmain", "pitcrew/x~1"].each do |branch|
+      expect(build(:fix_pull_request, branch:)).not_to be_valid, branch.inspect
+    end
+  end
+
   describe "one open PR per repository" do
     let(:repository) { create(:repository) }
 
