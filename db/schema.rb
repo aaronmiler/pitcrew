@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_24_070000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_26_170100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -227,6 +227,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_24_070000) do
     t.string "ecosystems", array: true
     t.jsonb "runtimes", default: {}, null: false
     t.string "ruby_minor"
+    t.jsonb "last_scan", default: {}, null: false
     t.index ["full_name"], name: "index_repositories_on_full_name", unique: true
     t.index ["github_id"], name: "index_repositories_on_github_id", unique: true
   end
@@ -256,6 +257,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_24_070000) do
     t.integer "manual_fix_minutes_low", default: 15, null: false
     t.integer "manual_fix_minutes_high", default: 30, null: false
     t.string "branch_separator", default: ".", null: false
+    t.string "advisory_db_commit"
+    t.datetime "advisory_db_committed_at"
+    t.datetime "advisory_db_checked_at"
     t.index ["singleton"], name: "index_settings_on_singleton", unique: true
   end
 

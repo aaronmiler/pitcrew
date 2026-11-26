@@ -56,6 +56,42 @@ RSpec.describe RepositoryScan do
     expect(described_class.call(repository:, force: true)).to eq(detected: 0, resolved: 0, open: 2, lockfile_changed: false)
   end
 
+  it "records what the scan checked" do
+    Setting.current.update_columns(advisory_db_commit: "db-1")
+    files["config/bundler-audit.yml"] = { sha: "c", content: "ignore:\n  - CVE-2099-0001\n" }
+
+    described_class.call(repository:)
+
+    scan = repository.reload.last_scan
+    expect(scan).to include(
+      "lockfile_sha" => "sha-1", "advisory_db_commit" => "db-1", "gems_checked" => 2, "advisories_checked" => 2,
+      "ignored" => ["CVE-2099-0001"], "detected" => 2, "resolved" => 0, "open" => 2
+    )
+    expect(scan["checked_at"]).to eq(scan["audited_at"])
+  end
+
+  it "moves only checked_at on a skipped scan" do
+    described_class.call(repository:)
+    audited = repository.reload.last_scan
+
+    travel 5.minutes do
+      described_class.call(repository:)
+    end
+
+    scan = repository.reload.last_scan
+    expect(scan.except("checked_at")).to eq(audited.except("checked_at"))
+    expect(Time.zone.parse(scan["checked_at"])).to be > Time.zone.parse(audited["checked_at"])
+  end
+
+  it "audits an unchanged lockfile once the advisory db has moved" do
+    Setting.current.update_columns(advisory_db_commit: "db-1")
+    described_class.call(repository:)
+    Setting.current.update_columns(advisory_db_commit: "db-2")
+
+    expect(described_class.call(repository: repository.reload)).to include(open: 2, lockfile_changed: false)
+    expect(repository.reload.last_scan["advisory_db_commit"]).to eq("db-2")
+  end
+
   it "doesn't duplicate findings or events on a re-scan" do
     described_class.call(repository:)
     described_class.call(repository:, force: true)

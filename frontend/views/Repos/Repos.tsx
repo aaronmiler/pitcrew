@@ -4,7 +4,7 @@ import { Link } from "react-router"
 
 import Badge, { CiBadge, EcosystemBadges, RubyBadge, rubyMinor } from "../../components/Badge"
 import JobFailures from "../../components/JobFailures"
-import { errorMessage, timeAgo } from "../../lib/format"
+import { errorMessage, pluralize, timeAgo } from "../../lib/format"
 import { LIVE, useManualRefresh } from "../../lib/refresh"
 import { apiRepositories } from "../../lib/routes"
 import type { RepositoryListItem } from "../../types"
@@ -111,7 +111,7 @@ const Repos = () => {
               <th>Enabled</th>
               <th>Findings</th>
               <th>Open PR</th>
-              <th>Last scanned</th>
+              <th>Last checked</th>
               <th />
             </tr>
           </thead>
@@ -159,7 +159,10 @@ const Repos = () => {
                   )}
                 </td>
                 <td className="text-muted">
-                  {repo.enabled ? timeAgo(repo.lastScannedAt) : "—"}
+                  {repo.enabled ? timeAgo(repo.lastScan.checkedAt ?? repo.lastScannedAt) : "—"}
+                  {repo.enabled && repo.lastScan.gemsChecked !== undefined && (
+                    <div className="text-xs">{pluralize(repo.lastScan.gemsChecked, "gem")} checked</div>
+                  )}
                   {repo.lastError && (
                     <div title={repo.lastError}>
                       <Badge tone="red">

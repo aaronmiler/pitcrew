@@ -1,4 +1,5 @@
 # App-wide settings edited in the UI. A single row; use Setting.current.
+# Also holds the advisory-db sync state (advisory_db_*), written by AdvisoryDbSyncJob, not the UI.
 # Bootstrap config (DB, encryption keys, GitHub App, PITCREW_INITIAL_USER) stays in env.
 class Setting < ApplicationRecord
   PR_TITLE_FIELDS = %i[count advisories gems gem_count ids repo date].freeze

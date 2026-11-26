@@ -1,7 +1,7 @@
 class RepositoryBlueprint < Blueprinter::Base
   identifier :id
   fields :full_name, :default_branch, :enabled, :runtimes, :last_scanned_at,
-    :last_error, :last_error_at, :last_error_source, :ecosystems, :supported_ecosystems, :ruby_minor
+    :last_error, :last_error_at, :last_error_source, :ecosystems, :supported_ecosystems, :ruby_minor, :last_scan
   field(:url) { |repo| "https://github.com/#{repo.full_name}" }
   # Whether a RESOLVER_RUBY_* env var names a sidecar for the repo's Ruby (configured, not pinged);
   # nil when its Ruby is unknown.
@@ -25,6 +25,11 @@ class RepositoryBlueprint < Blueprinter::Base
     # Configured resolver minors, newest first: the choices for ruby_minor.
     field(:resolver_minors) { Resolver::Client.endpoints.keys.sort_by { Gem::Version.new(it) }.reverse }
     field(:resolved_count) { |repo| repo.findings.resolved.count }
+    field(:advisory_db) do
+      setting = Setting.current
+      { commit: setting.advisory_db_commit, committed_at: setting.advisory_db_committed_at,
+        checked_at: setting.advisory_db_checked_at }
+    end
     # A GitHub outage going on when the last scan or fix failed, if any.
     field(:last_error_incident) { |repo| ServiceIncident.at_as_hash(repo.last_error_at) if repo.last_error }
     field(:findings) do |repo|

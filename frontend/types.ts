@@ -71,6 +71,27 @@ export interface FindingEvent {
   advisoryIdentifier: string
 }
 
+// What a repo's last scan checked; empty until its first audit since this was recorded.
+export interface LastScan {
+  checkedAt?: string
+  auditedAt?: string
+  lockfileSha?: string
+  advisoryDbCommit?: string | null
+  gemsChecked?: number
+  advisoriesChecked?: number
+  ignored?: string[]
+  detected?: number
+  resolved?: number
+  open?: number
+}
+
+// Where the local ruby-advisory-db checkout stands, from AdvisoryDbSyncJob.
+export interface AdvisoryDbState {
+  commit: string | null
+  committedAt: string | null
+  checkedAt: string | null
+}
+
 export interface Repository {
   id: number
   fullName: string
@@ -85,6 +106,7 @@ export interface Repository {
   supportedEcosystems: string[]
   resolverConfigured: boolean | null
   rubyMinor: string | null
+  lastScan: LastScan
   url: string
 }
 
@@ -96,6 +118,7 @@ export interface RepositoryListItem extends Repository {
 export interface RepositoryDetail extends Repository {
   resolverMinors: string[]
   resolvedCount: number
+  advisoryDb: AdvisoryDbState
   lastErrorIncident: ServiceIncident | null
   findings: Finding[]
   pullRequests: PullRequest[]
