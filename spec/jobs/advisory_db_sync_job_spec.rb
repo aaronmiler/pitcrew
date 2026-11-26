@@ -5,7 +5,23 @@ RSpec.describe AdvisoryDbSyncJob, type: :job do
 
   let!(:enabled) { create(:repository, enabled: true) }
 
-  before { create(:repository, enabled: false) }
+  before do
+    create(:repository, enabled: false)
+    allow(AdvisoryDb).to receive(:committed_at).and_return(Time.zone.parse("2026-11-22 14:40:03"))
+  end
+
+  it "records where the advisory db stands on every run, moved or not" do
+    allow(AdvisoryDb::Sync).to receive(:call).and_return(before: "abc", after: "abc")
+
+    freeze_time do
+      described_class.perform_now
+
+      expect(Setting.current).to have_attributes(
+        advisory_db_commit: "abc", advisory_db_committed_at: Time.zone.parse("2026-11-22 14:40:03"),
+        advisory_db_checked_at: Time.current
+      )
+    end
+  end
 
   it "does nothing when the advisory db hasn't moved" do
     allow(AdvisoryDb::Sync).to receive(:call).and_return(before: "abc", after: "abc")

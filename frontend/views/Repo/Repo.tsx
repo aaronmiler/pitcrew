@@ -9,6 +9,7 @@ import { LIVE, useManualRefresh } from "../../lib/refresh"
 import { apiRepositories } from "../../lib/routes"
 import type { FindingStatus, RepositoryDetail } from "../../types"
 import FindingRow from "./FindingRow"
+import ScanSummary from "./ScanSummary"
 
 const STATUS_ORDER: FindingStatus[] = ["needs_attention", "open", "in_pr"]
 
@@ -73,8 +74,7 @@ const Repo = () => {
             <code>{repo.fullName}</code>
           </a>
           <p className="text-sm text-muted">
-            {repo.enabled ? "Enabled" : "Disabled"} · Ruby {repo.runtimes.ruby ?? "unknown"} · {repo.defaultBranch} ·
-            scanned {timeAgo(repo.lastScannedAt)}
+            {repo.enabled ? "Enabled" : "Disabled"} · Ruby {repo.runtimes.ruby ?? "unknown"} · {repo.defaultBranch}
           </p>
           <label className="mt-2 flex items-center gap-2 text-sm text-muted">
             Ruby when there&apos;s no .ruby-version
@@ -126,6 +126,7 @@ const Repo = () => {
             ({pluralize(repo.resolvedCount, "resolved")} hidden)
           </span>
         </h2>
+        {repo.enabled && <ScanSummary scan={repo.lastScan} advisoryDb={repo.advisoryDb} />}
         {findings.length === 0 ? (
           <p className="text-sm text-muted">Nothing outstanding.</p>
         ) : (

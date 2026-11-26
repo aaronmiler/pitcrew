@@ -2,30 +2,49 @@
 # ruby-advisory-db, and records the result as findings + events:
 #   - new or re-appearing advisory -> finding opened, `detected` event
 #   - advisory gone from the lockfile -> finding resolved, `resolved` event
-# Skips the audit when the lockfile hasn't changed, unless forced (new advisories) or the
-# repo has no locked_versions yet (kept-current gems are compared against them).
+# Skips the audit when neither the lockfile nor the advisory db has changed since the last
+# audit, unless forced or the repo has no locked_versions yet (kept-current gems are compared
+# against them). Comparing the advisory-db commit means a failed rescan after new advisories
+# retries on the next scheduled scan instead of waiting for the next advisory.
 # Advisories the repo ignores in its bundler-audit config are skipped, like `bundle audit` does.
+# Every scan, skipped or not, is recorded in `last_scan` so the UI can show what was checked.
 class RepositoryScan < ApplicationService
   def call(repository:, force: false)
     @repository = repository
     lockfile = Github::RepoFile.call(repository:, path: "Gemfile.lock")
     return { skipped: "no Gemfile.lock" } unless lockfile
-    if !force && lockfile[:sha] == repository.lockfile_sha && repository.locked_versions.present?
+
+    advisory_db_commit = Setting.current.advisory_db_commit
+    if !force && unchanged?(lockfile, advisory_db_commit)
+      repository.update_columns(last_scan: repository.last_scan.merge("checked_at" => Time.current))
       return { skipped: "lockfile unchanged" }
     end
 
     # The first recording of locked_versions counts as a change, so kept-current gems get checked.
     lockfile_changed = lockfile[:sha] != repository.lockfile_sha || repository.locked_versions.blank?
-    results = Lockfile::Audit.call(content: lockfile[:content], ignore: ignored)
+    ignore = ignored
+    results = Lockfile::Audit.call(content: lockfile[:content], ignore:)
     summary = ActiveRecord::Base.transaction { record(results) }
+    versions = Lockfile::Versions.new(lockfile[:content]).versions
+    now = Time.current
     repository.update!(
-      lockfile_sha: lockfile[:sha], runtimes: repository.with_runtime(:ruby, ruby_version), last_scanned_at: Time.current,
-      locked_versions: Lockfile::Versions.new(lockfile[:content]).versions
+      lockfile_sha: lockfile[:sha], runtimes: repository.with_runtime(:ruby, ruby_version), last_scanned_at: now,
+      locked_versions: versions,
+      last_scan: {
+        checked_at: now, audited_at: now, lockfile_sha: lockfile[:sha], advisory_db_commit:,
+        gems_checked: versions.size, advisories_checked: Advisory.where(ecosystem: "rubygems").count,
+        ignored: ignore, **summary
+      }
     )
     summary.merge(lockfile_changed:)
   end
 
   private
+
+  def unchanged?(lockfile, advisory_db_commit)
+    lockfile[:sha] == @repository.lockfile_sha && @repository.locked_versions.present? &&
+      @repository.last_scan["advisory_db_commit"] == advisory_db_commit
+  end
 
   def record(results)
     now = Time.current

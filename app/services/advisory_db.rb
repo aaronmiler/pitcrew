@@ -14,6 +14,11 @@ module AdvisoryDb
     path.join(".git").directory?
   end
 
+  # When upstream made the checkout's HEAD commit.
+  def self.committed_at(path: self.path)
+    Time.iso8601(Command.run!("git", "log", "-1", "--format=%cI", chdir: path))
+  end
+
   def self.database(path: self.path)
     Bundler::Audit::Database.new(path.to_s)
   end

@@ -1,7 +1,13 @@
 # Pulls ruby-advisory-db, indexes what changed, and rescans enabled repos if anything did.
+# Every run records where the checkout stands on Setting, so the UI can show the sync is alive.
 class AdvisoryDbSyncJob < ApplicationJob
   def perform
     heads = AdvisoryDb::Sync.call
+    # Before the rescans: a scan audits whenever the commit differs from the one it last used.
+    Setting.current.update_columns(
+      advisory_db_commit: heads[:after], advisory_db_committed_at: AdvisoryDb.committed_at,
+      advisory_db_checked_at: Time.current
+    )
     return if heads[:before] == heads[:after]
 
     new_ids = AdvisoryDb::Import.call(**heads)
